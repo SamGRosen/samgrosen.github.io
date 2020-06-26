@@ -15,19 +15,30 @@ Education
 
 Work experience
 ======
-* Fall 2020: Software Engineering Intern @ Datadog
 
-* Summer 2019: Devops Intern @ DraftKings
+Fall 2020
+------
+* Software Engineering Intern @ Datadog
+
+Summer 2019
+------
+* Devops Intern @ DraftKings
   * Github University
   * Duties included: Tagging issues
   * Supervisor: Professor Git
 
-* Summer 2018/2017: Software Engineering Intern (Large-scala analytics group) @
+Summer 2018/2017
+------
+* Software Engineering Intern (Large-scala analytics group) @ 
   * Github University
   * Duties included: Merging pull requests
   * Supervisor: Professor Hub
   
-* Summer 2016
+Summer 2016
+------
+* Software Engineering Intern
+  *
+
 Skills
 ======
 * Skill 1
