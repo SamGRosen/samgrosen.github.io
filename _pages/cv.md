@@ -18,7 +18,7 @@ Work experience
 
 Fall 2020
 ------
-* Software Engineering Intern @ Datadog
+* Software Engineering Intern @ Datadog ![Datadog Logo](https://imgix.datadoghq.com/img/about/presskit/logo-v/logo_vertical_purple.png)
 
 Summer 2019
 ------
