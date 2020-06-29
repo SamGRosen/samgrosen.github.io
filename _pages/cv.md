@@ -24,11 +24,14 @@ Fall 2020
 
 Summer 2019
 ------
-* Devops Intern @ DraftKings 
+<p id="test"> test </p>
+* Devops Intern @ DraftKings <p id="test"> test </p>
+<p id="test"> test </p>
+  * <p id="test"> test </p>
   * Github University
   * Duties included: Tagging issues
   * Supervisor: Professor Git
-
+<p id="test"> test </p>
 {% if 'this' %}
   <p id="test"> test2 </p>
 {% endif %}
