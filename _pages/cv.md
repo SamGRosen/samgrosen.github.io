@@ -9,6 +9,8 @@ redirect_from:
 
 {% include base_path %}
 
+<p id="test"> test </p>
+
 Education
 ======
 * B.S. in Computer Science; B.S. in Mathematics, UMass Amherst, 2021 (3.9/4.0)
@@ -22,10 +24,14 @@ Fall 2020
 
 Summer 2019
 ------
-* Devops Intern @ DraftKings <p id="test"> test </p>
+* Devops Intern @ DraftKings 
   * Github University
   * Duties included: Tagging issues
   * Supervisor: Professor Git
+
+{% if 'this' %}
+  <p id="test"> test2 </p>
+{% endif %}
 
 Summer 2018/2017
 ------
