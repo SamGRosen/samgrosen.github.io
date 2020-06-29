@@ -25,15 +25,12 @@ Fall 2020
 Summer 2019
 ------
 <p id="test"> test </p>
-* Devops Intern @ DraftKings <p id="test"> test </p>
-  * <p id="test"> test </p>
-  * Github University
-  * Duties included: Tagging issues
-  * Supervisor: Professor Git
+* Devops Intern @ DraftKings {% if 'this' %} <p id="test"> test2 </p> {% endif %}
+  * Created a scalable application for live tracking of release branches to production using AWS Lambda.
+  * Designed serverless architecture scalable to arbitrary codebase size with complete up-to-date release data.
+  * Designed DynamoDB schema and frontend with React for a responsive efficient API and user interface.
 <p id="test"> test </p>
-{% if 'this' %}
-  <p id="test"> test2 </p>
-{% endif %}
+
 
 Summer 2018/2017
 ------
