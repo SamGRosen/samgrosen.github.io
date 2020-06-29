@@ -34,15 +34,17 @@ Summer 2019
 
 Summer 2018/2017
 ------
-* Software Engineering Intern (Large-scala analytics group) @ 
-  * Github University
-  * Duties included: Merging pull requests
-  * Supervisor: Professor Hub
+* Software Engineering Intern (Large-scala analytics group) @ Johns Hopkins University: Applied Physics Lab
+  * Developed graph analytics using Java and functional programming with Gremlin for compliant graph databases.
+  * Programmed low-memory implementations of machine learning algorithms for training on arbitrarily large data.
+  * Created analytics for graph multi-edge merging, time-series, and data fusion using Java and MapReduce.
+  * Developed random forest algorithm on a distributed data system for classifying attributes on graph vertices.
   
 Summer 2016
 ------
-* Software Engineering Intern
-  *
+* Software Engineering Intern @ General Dynamics Mission Systems
+  * Worked with a partner to build a microservice acting as a REST backend to serve PDF’s with Spring.
+  * Created a service to read generated reports through a REST API on a dynamic front-end with React.
 
 Skills
 ======
