@@ -26,7 +26,6 @@ Summer 2019
 ------
 <p id="test"> test </p>
 * Devops Intern @ DraftKings <p id="test"> test </p>
-<p id="test"> test </p>
   * <p id="test"> test </p>
   * Github University
   * Duties included: Tagging issues
