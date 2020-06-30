@@ -9,7 +9,7 @@ redirect_from:
 
 {% include base_path %}
 
-<p id="test"> test </p>
+<script src="./test.css"> </script>
 
 Education
 ======
