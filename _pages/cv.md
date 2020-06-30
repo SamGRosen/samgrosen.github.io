@@ -9,7 +9,7 @@ redirect_from:
 
 {% include base_path %}
 
-<script src="./test.css"> </script>
+<link rel="stylesheet" href="https://samgrosen.github.io/assets/css/cv.css">
 
 Education
 ======
