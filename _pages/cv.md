@@ -1,6 +1,6 @@
 ---
 layout: archive
-title: "CV"
+title: "S. Rosen"
 permalink: /cv/
 author_profile: true
 redirect_from:
@@ -9,67 +9,117 @@ redirect_from:
 
 {% include base_path %}
 
-<link rel="stylesheet" href="https://samgrosen.github.io/assets/css/cv.css">
+<link rel="stylesheet" href="/assets/css/cv.css">
+
+<div id="as_pdf">
+  <a href="/files/cv.pdf">
+    <i class="fas fa-file-pdf" aria-hidden="true"></i> Download
+  </a>
+</div>
 
 Education
 ======
-* B.S. in Computer Science; B.S. in Mathematics, UMass Amherst, 2021 (3.9/4.0)
+<hr id="education_bar" />
+
+<div id="education_box">
+  <div> University of Massachusetts: Amherst </div>
+
+  <div> May, 2021 </div>
+
+  <div> B.S. in Computer Science; B.S. in Mathematics </div>
+
+  <div> GPA: 3.9/4.0 </div>
+</div>
 
 Work experience
 ======
+<hr />
 
-Fall 2020
-------
-* Software Engineering Intern @ Datadog ![Datadog Logo](https://imgix.datadoghq.com/img/about/presskit/logo-v/logo_vertical_purple.png)
+<div id="work_box">
+  <div class="job_box">
+    <div class="job_title">
+      <div>Datadog</div>
+      <div>Fall 2020</div>
+    </div>
+    <p>Software Engineering Intern</p>
+    <ul>
+      <li> Starting September 2020 </li>
+    </ul>
+  </div>
+  <div class="job_box">
+    <div class="job_title">
+      <div>DraftKings</div>
+      <div>Summer 2019</div>
+    </div>
+    <p>DevOps Intern</p>
+    <ul>
+      <li> Created a scalable application for live tracking of release branches to production using AWS Lambda. </li>
+      <li> Designed serverless architecture scalable to arbitrary codebase size with complete up-to-date release data. </li>
+      <li> Designed DynamoDB schema and frontend with React for a responsive efficient API and user interface. </li>
+    </ul>
+  </div>
+  <div class="job_box">
+    <div class="job_title">
+      <div>Johns Hopkins University: Applied Physics Lab</div>
+      <div>Summer 2018/2017</div>
+    </div>
+    <p>Software Engineering Intern (Large-scale analytics group)</p>
+    <ul>
+      <li> Developed graph analytics using Java and functional programming with Gremlin for compliant graph databases. </li>
+      <li> Programmed low-memory implementations of machine learning algorithms for training on arbitrarily large data. </li>
+      <li> Created analytics for graph multi-edge merging, time-series, and data fusion using Java and MapReduce. </li>
+      <li> Developed random forest algorithm on a distributed data system for classifying attributes on graph vertices. </li>
+    </ul>
+  </div>
 
-Summer 2019
-------
-* Devops Intern @ DraftKings {% if 'this' %} <p id="test"> test2 </p> {% endif %}
-  * Created a scalable application for live tracking of release branches to production using AWS Lambda.
-  * Designed serverless architecture scalable to arbitrary codebase size with complete up-to-date release data.
-  * Designed DynamoDB schema and frontend with React for a responsive efficient API and user interface.
+  <div class="job_box">
+    <div class="job_title">
+      <div>General Dynamics Mission Systems</div>
+      <div>Summer 2016</div>
+    </div>
+    <p>Software Engineering Intern</p>
+    <ul>
+      <li> Worked with a partner to build a microservice acting as a REST backend to serve PDF’s with Spring. </li>
+      <li> Created a service to read generated reports through a REST API on a dynamic front-end with React. </li>
+    </ul>
+  </div>  
+  <div class="job_box">
+    <div class="job_title">
+      <div>UMass Mathematics Department</div>
+      <div>Spring 2020</div>
+    </div>
+    <p>Differential Equations Grader</p>
+    <ul>
+      <li> Graded <i>Ordinary Differential Equations</i> homework for two course sections. </li>
+    </ul>
+  </div>
+  <div class="job_box">
+    <div class="job_title">
+      <div>UMass Mathematics Department</div>
+      <div>Sept. 2018 - May 2019</div>
+    </div>
+    <p>Undergraduate Teaching Assistant</p>
+    <ul>
+      <li> Held office hours for <i>Calculus for Life and Social Sciences I</i> for 5 hours a week. </li>
+      <li> Presented exam review material for up to 200 students at a time. </li>
+    </ul>
+  </div>
+</div>
 
-Summer 2018/2017
-------
-* Software Engineering Intern (Large-scala analytics group) @ Johns Hopkins University: Applied Physics Lab
-  * Developed graph analytics using Java and functional programming with Gremlin for compliant graph databases.
-  * Programmed low-memory implementations of machine learning algorithms for training on arbitrarily large data.
-  * Created analytics for graph multi-edge merging, time-series, and data fusion using Java and MapReduce.
-  * Developed random forest algorithm on a distributed data system for classifying attributes on graph vertices.
-  
-Summer 2016
-------
-* Software Engineering Intern @ General Dynamics Mission Systems
-  * Worked with a partner to build a microservice acting as a REST backend to serve PDF’s with Spring.
-  * Created a service to read generated reports through a REST API on a dynamic front-end with React.
 
-Skills
+Skills and Interests
 ======
-* Skill 1
-* Skill 2
-  * Sub-skill 2.1
-  * Sub-skill 2.2
-  * Sub-skill 2.3
-* Skill 3
+<hr />
+* **Programming Languages:** Python\*\*\*, Java\*\*\*, JavaScript\*\*\*, Matlab\*, Scala\*, R\*, C\*
+* **Related Technologies:** Linux, Git, React, Redux, HTML/CSS, Node.js, Gremlin, NumPy, Maven, JUnit, MySQL, libGDX, PIL, AWS Lambda, DynamoDB, S3, D3.js, THREE.js, C# Make
+* **Selected Coursework:** Data Structures, Statistical Networks, Mathematical Modeling, Stat I and II, Algorithms, Data Visualization, Graphics, Computer Systems, Numerical Analysis, Simulation, Time Series
 
-Publications
+Selected Projects
 ======
+<hr />
+
   <ul>{% for post in site.publications %}
     {% include archive-single-cv.html %}
-  {% endfor %}</ul>
-  
-Talks
-======
-  <ul>{% for post in site.talks %}
-    {% include archive-single-talk-cv.html %}
-  {% endfor %}</ul>
-  
-Teaching
-======
-  <ul>{% for post in site.teaching %}
-    {% include archive-single-cv.html %}
-  {% endfor %}</ul>
-  
-Service and leadership
-======
-* Currently signed in to 43 different slack teams
+  {% endfor %}
+  </ul>
+
