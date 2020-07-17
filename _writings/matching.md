@@ -227,7 +227,7 @@ Below we have a visualization describing the distribution on the number of failu
 
 <div id="failure-pdf"></div>
 
-In conclusion, we have that playing the game perfectly will almost always result in completing the game in about $1.61$ moves with little deviation from this value. We've shown a framework for calculating the distribution on the number of moves required to complete the game and given a computational understanding of a simple card game. For another case study on Markov chains and games of chance see this excellent [article](https://jakevdp.github.io/blog/2017/12/18/simulating-chutes-and-ladders/) on Chutes & Ladders.
+In conclusion, we have that playing the game perfectly will almost always result in completing the game in about $1.61n$ moves with little deviation from this value. We've shown a framework for calculating the distribution on the number of moves required to complete the game and given a computational understanding of a simple card game. For another case study on Markov chains and games of chance see this excellent [article](https://jakevdp.github.io/blog/2017/12/18/simulating-chutes-and-ladders/) on Chutes & Ladders.
 
 Bonus: The Royal Farms Reward Game
 ------
