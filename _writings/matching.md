@@ -66,17 +66,17 @@ Let the number of distinct card *colors* in a player's memory and the number of 
 When there are still unseen cards ($\beta > 0$) we can break down state changes and probabilities from player moves as follows:
 
 * The first chosen card's color in memory so a pair is completed: 
-  \begin{align\*} P(X_{t+1} = (\alpha - 1, \beta - 1 ) \vert X_{t} = (\alpha, \beta)) & = P(c_1 \in M) \\\\ & = \min\left(\frac{\alpha}{\beta}, 1\right) \end{align\*} 
+  \begin{align\*} P(X_{t+1} = (\alpha - 1, \beta - 1 ) \vert X_{t} = (\alpha, \beta)) & = P(c_1 \in M) \\\\\\ & = \min\left(\frac{\alpha}{\beta}, 1\right) \end{align\*} 
   * $\alpha$ and $\beta$ both decrease by 1, as we have removed a single color from memory and its pairing card from the set of unviewed cards.
   * As the complement, the probability that a first chosen card has an unseen color is $P(c_1 \notin M) = \left(1 - \min\left(\frac{\alpha}{\beta}, 1\right)\right) = \max\left(0, 1 - \frac{\alpha}{\beta}\right) $
 * The first chosen card's color is NOT in memory but the second chosen color happens to be the same: 
-  \begin{align\*} P(X_{t+1} = (\alpha, \beta - 2) \| X_t = (\alpha, \beta)) & = P(c_1 \notin M \cap c_1 = c_2) \\\\ & = \max\left(0, 1 - \frac{\alpha}{\beta}\right) \left(\frac{1}{\beta - 1}\right) \end{align\*}
+  \begin{align\*} P(X_{t+1} = (\alpha, \beta - 2) \| X_t = (\alpha, \beta)) & = P(c_1 \notin M \cap c_1 = c_2) \\\\\\ & = \max\left(0, 1 - \frac{\alpha}{\beta}\right) \left(\frac{1}{\beta - 1}\right) \end{align\*}
   * $\beta$ decreases by 2 since two cards are removed from the set of unviewed cards. $\alpha$ is unchanged as the color that would have been added to memory is removed immediately.
 * The first chosen color is NOT in memory and the second chosen color is also NOT in memory (but not the same as the first chosen card): 
-  \begin{align\*} P(X_{t+1} = (\alpha + 2, \beta - 2) \| X_t = (\alpha, \beta)) & = P(c_1 \notin M \cap c_2 \notin M \cap c_1 \neq c2) \\\\ & = \max\left(0, 1 - \frac{\alpha}{\beta}\right) \left(1 - \frac{\alpha+1}{\beta - 1}\right)\end{align\*}
+  \begin{align\*} P(X_{t+1} = (\alpha + 2, \beta - 2) \| X_t = (\alpha, \beta)) & = P(c_1 \notin M \cap c_2 \notin M \cap c_1 \neq c2) \\\\\\ & = \max\left(0, 1 - \frac{\alpha}{\beta}\right) \left(1 - \frac{\alpha+1}{\beta - 1}\right)\end{align\*}
   * $\alpha$ increases by 2 and $\beta$ decreases by 2 as two previously unseen colors are added to the memory set.
 * The first chosen color is NOT in memory but the second chosen color IS in memory so the subsequent turn results in a completed pair:
-  \begin{align\*} P(X_{t+1} = (\alpha + 1, \beta - 2) \| X_t = (\alpha, \beta)) & = P(c_1 \notin M \cap c_2 \in M) \\\\ & = \max\left(0, 1 - \frac{\alpha}{\beta}\right) \left(\frac{\alpha}{\beta - 1} \right)\end{align\*}
+  \begin{align\*} P(X_{t+1} = (\alpha + 1, \beta - 2) \| X_t = (\alpha, \beta)) & = P(c_1 \notin M \cap c_2 \in M) \\\\\\ & = \max\left(0, 1 - \frac{\alpha}{\beta}\right) \left(\frac{\alpha}{\beta - 1} \right)\end{align\*}
   * After this turn $\alpha$ increases by only 1 as we found a new color but the second card color was already in memory. However, $\beta$ decreases by 2 as there are now two less unknown cards. This discrepency is confusing as we define the state of our system in terms of the number of *colors* seen and the number of *cards* not seen.
 
 Some base/special cases need to be defined when $\beta = 0$ i.e. when every card has been viewed by the player:
@@ -100,10 +100,10 @@ It may be easiest to understand the Markov chain by example. Consider the case f
 $$ 
 \begin{equation}
  P(i, j) = \begin{pmatrix}
-    0  & 2/3 & 0 & 1/3 & 0 \\
-    0  & 0   & 1 & 0 & 0 \\
-    0  & 0   & 0 & 0 & 1 \\
-    0  & 0   & 0 & 0 & 1 \\
+    0  & 2/3 & 0 & 1/3 & 0 \\\\
+    0  & 0   & 1 & 0 & 0 \\\\
+    0  & 0   & 0 & 0 & 1 \\\\
+    0  & 0   & 0 & 0 & 1 \\\\
     0  & 0   & 0 & 0 & 1 
   \end{pmatrix}
 \end{equation} \tag{1}\label{1}
@@ -114,15 +114,15 @@ Where entry $P(i,j)$ is the probability to move from state $S_i$ to state $S_j$.
 $$ 
 \begin{equation}
  P(i, j) = \begin{pmatrix}
-    0 & 4/5 & 0 & 0 & 0 & 1/5 & 0 & 0 & 0 & 0 \\
-    0 & 0 & 1/2 & 1/3 & 0 & 0 & 1/6 & 0 & 0 & 0 \\
-    0 & 0 & 0 & 0 & 1/3 & 0 & 0 & 1/3 & 1/3 & 0 \\
-    0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 \\
-    0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 \\
-    0 & 0 & 0 & 0 & 0 & 0 & 2/3 & 0 & 1/3 & 0 \\
-    0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 \\
-    0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 \\
-    0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 \\
+    0 & 4/5 & 0 & 0 & 0 & 1/5 & 0 & 0 & 0 & 0 \\\\
+    0 & 0 & 1/2 & 1/3 & 0 & 0 & 1/6 & 0 & 0 & 0 \\\\
+    0 & 0 & 0 & 0 & 1/3 & 0 & 0 & 1/3 & 1/3 & 0 \\\\
+    0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 \\\\
+    0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 \\\\
+    0 & 0 & 0 & 0 & 0 & 0 & 2/3 & 0 & 1/3 & 0 \\\\
+    0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 \\\\
+    0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 \\\\
+    0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 \\\\
     0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 
   \end{pmatrix}
 \end{equation} \tag{2}\label{2}
@@ -147,14 +147,14 @@ $$
 P = \begin{equation}
 
   \left(\begin{array}{c|c}
-    \mathbf{Q} & \mathbf{R} \\
+    \mathbf{Q} & \mathbf{R} \\\\
     \hline
-    \mathbf{0} & \mathbf{I} \\
+    \mathbf{0} & \mathbf{I} \\\\
   \end{array}\right) =   \left(\begin{array}{cccc|c}
- 0  & 2/3 & 0 & 1/3 & 0 \\
-    0  & 0   & 1 & 0 & 0 \\
-    0  & 0   & 0 & 0 & 1 \\
-    0  & 0   & 0 & 0 & 1 \\
+ 0  & 2/3 & 0 & 1/3 & 0 \\\\
+    0  & 0   & 1 & 0 & 0 \\\\
+    0  & 0   & 0 & 0 & 1 \\\\
+    0  & 0   & 0 & 0 & 1 \\\\
     \hline
     0  & 0   & 0 & 0 & 1 
   \end{array}\right)
@@ -169,15 +169,15 @@ $$
 \begin{equation*}
     (\mathbf{I - Q})^{-1} \mathbf{1} =  
     \begin{pmatrix}
-    1  & -2/3 & 0   & -1/3  \\
-    0  & 1    & -1  & 0  \\
-    0  & 0    & 1   & 0  \\
-    0  & 0    & 0   & 1  \\
+    1  & -2/3 & 0   & -1/3  \\\\
+    0  & 1    & -1  & 0  \\\\
+    0  & 0    & 1   & 0  \\\\
+    0  & 0    & 0   & 1  \\\\
   \end{pmatrix}^{-1} \begin{pmatrix}
-    1  \\
-    1  \\
-    1  \\
-    1  \\
+    1  \\\\
+    1  \\\\
+    1  \\\\
+    1  \\\\
   \end{pmatrix} 
 \end{equation*}  
 $$
@@ -186,20 +186,20 @@ $$
 $$
 \begin{equation*}
   = \begin{pmatrix}
-    1  & 2/3 & 2/3  & 1/3  \\
-    0   & 1  & 1  & 0  \\
-    0   & 0   & 1 & 0  \\
-    0   & 0   & 0  & 1  \\
+    1  & 2/3 & 2/3  & 1/3  \\\\
+    0   & 1  & 1  & 0  \\\\
+    0   & 0   & 1 & 0  \\\\
+    0   & 0   & 0  & 1  \\\\
   \end{pmatrix}\begin{pmatrix}
-    1  \\
-    1  \\
-    1  \\
-    1  \\
+    1  \\\\
+    1  \\\\
+    1  \\\\
+    1  \\\\
   \end{pmatrix} = \begin{pmatrix}
-    8/3  \\
-    2  \\
-    1  \\
-    1  \\
+    8/3  \\\\
+    2  \\\\
+    1  \\\\
+    1  \\\\
   \end{pmatrix} 
   
 \end{equation*}
