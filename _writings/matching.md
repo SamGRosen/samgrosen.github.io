@@ -159,7 +159,7 @@ P = \begin{equation}
 \end{equation} \tag{2}\label{2}
 $$
 
-Where $\mathbf{Q}$ is a square matrix describing the state transitions between non-absorbing states, $\mathbf{R}$ is a vector of probabilities for non-absorbing states to move into absorbing states, and $I$ is an identity matrix with a dimension equal to the number of absorbing states. Using $\eqref{1}$ as an example, we see that we will only have a one-dimensional identity matrix as there is only one absorbing state. The vector $\mathbf{R}$ shows that we can move into the absorbing state when we are in states $(2,0)$ or $(1,1)$ i.e. there are two cards left on the table.
+Where $$\mathbf{Q}$$ is a square matrix describing the state transitions between non-absorbing states, $\mathbf{R}$ is a vector of probabilities for non-absorbing states to move into absorbing states, and $I$ is an identity matrix with a dimension equal to the number of absorbing states. Using $\eqref{1}$ as an example, we see that we will only have a one-dimensional identity matrix as there is only one absorbing state. The vector $\mathbf{R}$ shows that we can move into the absorbing state when we are in states $(2,0)$ or $(1,1)$ i.e. there are two cards left on the table.
 
 This form allows us to calculate the fundamental matrix, $\mathbf N = (\mathbf I - \mathbf Q)^{-1} $. This matrix allows us to find the expected number of steps to complete the game when starting from a given state with the formula $\mathbf{N}\mathbf{1}$ where $\mathbf{1}$ is the vector of all ones. Although matrix calculations can be expensive, this calculation is relatively inexpensive as sparse matrix calculations on the resulting triangular matrix are very efficient. Using $\mathbf Q$ as it is defined in $\eqref{2}$ we find the expected number of steps to complete the game starting with two pairs is the first element of:
 
@@ -264,19 +264,6 @@ Sources
 <script type="text/javascript" src="/assets/js/matching/matching-game-perfect.js"></script>
 <script type="text/javascript" src="/assets/js/matching/matching-game-markov-network.js"></script>
 <script type="text/javascript" src="/assets/js/matching/matching-game-failures-pdf.js"></script>
-
-
-<script type="text/x-mathjax-config"> MathJax.Hub.Config({ TeX: {  } }); </script>
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-    tex2jax: {
-      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
-      processEscapes: true
-    }
-  });
-</script>
-<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/latest.js?config=TeX-MML-AM_CHTML' async></script>
-
 
 Appendix
 ------
