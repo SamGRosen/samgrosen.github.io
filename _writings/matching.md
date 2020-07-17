@@ -141,8 +141,7 @@ Results
 
 With the computed transition matrix $P$ we can use some well-known facts about Markov chains to understand the perfect player's results. Our Markov chain ends when the game is complete i.e. the state is $(0,0)$. Once in this state, the player never leaves; this is an absorbing state. Absorbing states have some nice properties that allow for an easy computation to find the expected number of steps to reach them. The transition matrix of a Markov chain with absorbing states can be written in the following form <sup> [[1]](./matching#sources) </sup>:
 
-$$
-P = \begin{equation}
+$$P = \begin{equation}
 
   \left(\begin{array}{c|c}
     \mathbf{Q} & \mathbf{R}  \\
@@ -156,17 +155,13 @@ P = \begin{equation}
     \hline
     0  & 0   & 0 & 0 & 1 
   \end{array}\right)
-\end{equation} \tag{2}\label{2}
-$$
+\end{equation} \tag{2}\label{2}$$
 
-Where $$
-\mathbf{Q}
-$$ is a square matrix describing the state transitions between non-absorbing states, $\mathbf{R}$ is a vector of probabilities for non-absorbing states to move into absorbing states, and $I$ is an identity matrix with a dimension equal to the number of absorbing states. Using $\eqref{1}$ as an example, we see that we will only have a one-dimensional identity matrix as there is only one absorbing state. The vector $\mathbf{R}$ shows that we can move into the absorbing state when we are in states $(2,0)$ or $(1,1)$ i.e. there are two cards left on the table.
+Where $ \mathbf Q $ is a square matrix describing the state transitions between non-absorbing states, $\mathbf{R}$ is a vector of probabilities for non-absorbing states to move into absorbing states, and $I$ is an identity matrix with a dimension equal to the number of absorbing states. Using $\eqref{1}$ as an example, we see that we will only have a one-dimensional identity matrix as there is only one absorbing state. The vector $\mathbf{R}$ shows that we can move into the absorbing state when we are in states $(2,0)$ or $(1,1)$ i.e. there are two cards left on the table.
 
 This form allows us to calculate the fundamental matrix, $\mathbf N = (\mathbf I - \mathbf Q)^{-1} $. This matrix allows us to find the expected number of steps to complete the game when starting from a given state with the formula $\mathbf{N}\mathbf{1}$ where $\mathbf{1}$ is the vector of all ones. Although matrix calculations can be expensive, this calculation is relatively inexpensive as sparse matrix calculations on the resulting triangular matrix are very efficient. Using $\mathbf Q$ as it is defined in $\eqref{2}$ we find the expected number of steps to complete the game starting with two pairs is the first element of:
 
-$$ 
-\begin{equation*}
+$$\begin{equation*}
     (\mathbf{I - Q})^{-1} \mathbf{1} =  
     \begin{pmatrix}
     1  & -2/3 & 0   & -1/3   \\
@@ -179,12 +174,10 @@ $$
     1   \\
     1   \\
   \end{pmatrix} 
-\end{equation*}  
-$$
+\end{equation*}$$
 
 
-$$
-\begin{equation*}
+$$\begin{equation*}
   = \begin{pmatrix}
     1  & 2/3 & 2/3  & 1/3   \\
     0   & 1  & 1  & 0   \\
@@ -202,8 +195,7 @@ $$
     1   \\
   \end{pmatrix} 
   
-\end{equation*}
-$$
+\end{equation*}$$
 
 Therefore for a game starting with 2 pairs, the expected number of moves is $8/3$. Because at least 2 moves are required to finish the game, the expected number of failures is $2/3$. Continuing these calculations for we have the results for the first 10 non-trivial games:
 
