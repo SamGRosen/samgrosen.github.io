@@ -265,6 +265,19 @@ Sources
 <script type="text/javascript" src="/assets/js/matching/matching-game-markov-network.js"></script>
 <script type="text/javascript" src="/assets/js/matching/matching-game-failures-pdf.js"></script>
 
+
+<script type="text/x-mathjax-config"> MathJax.Hub.Config({ TeX: {  } }); </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/latest.js?config=TeX-MML-AM_CHTML' async></script>
+
+
 Appendix
 ------
 
