@@ -77,8 +77,11 @@ path {
 }
 
 #royal-farms-images > img {
-    width: 35%;
+    width: auto;
+    height: auto;
     margin: 5%;
     border: 3px solid black;
     border-radius: 5%;
+    max-width: 35%;
+    max-height: 30em;
 }
