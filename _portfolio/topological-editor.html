@@ -1,0 +1,281 @@
+---
+title: "Topological"
+description: "An interactive topology map created using d3.js. To raise the map left-click on the map; right-click to raise it. To achieve the depth effect, the code does not use the fill attribute on the svg paths. Instead it builds a rectangle for each path and clips it."
+imgLink: "/images/topological-editor.png"
+sourceCode: "https://github.com/SamGRosen/samgrosen.github.io/blob/master/_portfolio/topological-editor.html"
+collection: portfolio
+layout: none
+---
+
+<link rel="stylesheet" href="{{ base_path }}/assets/css/main.css">
+<style>
+    body { 
+        margin: 0; 
+        padding: 0;
+    }
+
+    #editor {
+        background-color: #EEE;
+    }
+
+    .header-layout {
+        position: absolute;
+        top: 1em;
+        margin: 0;
+    }
+
+    #icons {
+        position: absolute;
+        left: 1em;
+    }
+
+    #icons > a {
+        text-decoration: none;
+        color:rgb(73, 78, 82)
+    }
+
+    .header-layout i {
+        margin: 0 0.5em;
+        line-height: inherit;
+    }
+
+    #icons > span {
+        position: fixed;
+        background-color: #FFF;
+        padding: 0 0.5em;
+        box-shadow: rgb(170, 170, 170) 0px 0.2em 0.8em;
+    }
+
+    #tray {
+        right: 1em;
+    }
+
+    #tray > i {
+        cursor: pointer;
+    }
+
+
+</style>
+
+<div id="icons" class="header-layout">
+    <a href="/">
+      <i class="fas fa-home" aria-hidden="true"></i>
+    </a>
+    <i class="fas fa-question" aria-hidden="true"></i>
+    <span style="top: -100px"> Left-click to raise; right to lower. </span>
+</div>
+
+<div id="tray" class="header-layout">
+    <i class="fas fa-paint-brush" aria-hidden="true"></i>
+</div>
+
+
+<div id="editor"></div>
+
+<script type="text/javascript" src="/assets/js/libraries/d3.v5.min.js"></script>
+<script type="text/javascript">
+
+// Add help button
+d3.select("#icons > .fa-question")
+    .on("mouseover", function() {
+        d3.select("#icons > span")
+            .transition().duration(50)
+            .style("top", "1em")
+    })
+    .on("mouseleave", function () {
+        d3.select("#icons > span")
+            .transition().delay(2500).duration(100)
+            .style("top", "-100px")
+    })
+
+// Add color button
+const colorScales = [
+    d3.interpolateGreys,
+    d3.scaleLinear() // constant color
+        .domain([0, 1])
+        .range(['#BBB', '#BBB'])
+        .interpolate(d3.interpolateRgb),    
+    d3.interpolateCool,
+    d3.interpolateCubehelixDefault,
+    d3.interpolateMagma,
+    d3.interpolateRainbow
+];
+
+let colorScaleIndex = 0;
+d3.select("#tray > .fa-paint-brush")
+    .on("click", function() {
+        colorScaleIndex = (colorScaleIndex + 1) % colorScales.length;
+        plot.selectAll("path")
+            .transition().duration(1000)
+            .attr("stroke", dynamicColorScale)
+    })
+
+
+const width = document.body.clientWidth;
+const height = document.body.clientHeight; 
+
+
+
+const interval = 50;
+
+// Curve changing parameters
+const maxHeightChangePerSecond = 300;
+const brushStrength = maxHeightChangePerSecond / interval;
+// We are using a scaled gaussian pdf for our weights, and we know that 3 standard deviations away from the mean will encompass most of the weight
+// i.e. this parameter is basically one-third the value of a de facto brush radius
+const brushTrailOff = 30;
+
+// Strictly calculated by program
+const numColumns = 80;
+const numLines = numColumns;
+const lineWidth = height / 300;
+const strengthCutoff = .1 / ((1000 / interval) * brushStrength); // Ensures we remove processing points that will not increase by .1 pixel/second
+
+const terrain = [...Array(numLines).keys()].map(y => {
+    return [...Array(numColumns).keys()].map(x =>
+        [x / (numColumns - 1) * width, y / (numLines - 1) * height]
+    )
+});
+
+const horizonDrawer = d3.line()
+    .curve(d3.curveBasis)
+    .x(d => d[0])
+    .y(d => d[1]);
+
+const dynamicColorScale = (_, i) => colorScales[colorScaleIndex](i/numLines)
+
+const rectFill = "#FFF";
+
+let downTimer = undefined
+
+const svg = d3.select("#editor").append("svg")
+    .attr("width", "100%")
+    .attr("height", "100%")
+    .on("mousedown", function () { // One thing I dislike about JS is that how a function is defined changes 'this'
+        const [x, y] = d3.mouse(this);
+        const closePoints = getPointsAndWeights(x, y);
+        if (d3.event.button == 0) { // left mouse click
+            downTimer = setInterval(() => updatePoints(closePoints, true), interval);
+        } else if (d3.event.button == 2) { // right mouse click
+            downTimer = setInterval(() => updatePoints(closePoints, false), interval);
+        }
+    })
+    .on("contextmenu", () => { // override right click
+        d3.event.preventDefault();
+    });
+
+window.addEventListener('mouseup', function () { // ensures we detect mouseup anywhere on the screen
+    clearInterval(downTimer)
+})
+
+
+// Add clipping paths so we can fill only below paths as the standard SVG fill is overzealous
+const defs = svg.append("defs")
+
+defs
+    .selectAll("clipPath")
+    .data(terrain)
+    .enter()
+    .append("clipPath")
+    .attr("id", (_, i) => `clip-path-${i}`)
+    .append("path")
+    .attr("d", d => {
+        const topCurve = horizonDrawer(d)
+        return `${topCurve}L${width},${height}L0,${height}L0,${d[0][1]}`
+    })
+
+const plot = svg.append("g")
+    .attr("id", "plot")
+
+// Create group for each horizon and its filler
+const groups = plot.selectAll(".path-group")
+    .data(terrain)
+    .enter()
+    .append("g")
+
+// Draw horizon fillers
+groups
+    .append("rect")
+    .attr("class", "filler")
+    .attr("fill", (_, i) => d3.interpolateGreys(i/numLines))
+    .attr("x", 0)
+    .attr("y", 0)
+    .attr("width", width)
+    .attr("height", height)
+    .attr("clip-path", (_, i) => `url(#clip-path-${i})`)
+
+// Draw horizons
+groups
+    .append("path")
+    .attr("class", "horizon")
+    .attr("d", horizonDrawer)
+    .attr("stroke", dynamicColorScale)
+    .attr("stroke-width", lineWidth)
+    .attr("stroke-opacity", 0.7)
+    .attr("fill", "none")
+
+const points = plot.append("g")
+    .attr("id", "points")
+
+// Here for debugging purposes
+// points.selectAll("circle")
+//     .data(terrain.flatMap(row => row))
+//     .enter()
+//     .append("circle")
+//     .attr("r", 1)
+//     .attr("fill", "green")
+//     .attr("opacity", 0.8)
+//     .attr("cx", d => d[0])
+//     .attr("cy", d => d[1])
+
+
+
+const getPointsAndWeights = (mouseX, mouseY) => { // Use reduce as we want to map and filter at the same time
+    const closePoints = [...Array(terrain.length).keys()].map(_ => []);
+    terrain.forEach((row, rowIndex) => 
+        row.forEach((point, columnIndex) => {
+            const dist = Math.hypot(mouseX - point[0], mouseY - point[1])
+            const gaussianWeight = Math.exp((-1/2) * (dist/brushTrailOff) ** 2); 
+            if(gaussianWeight > strengthCutoff) {
+                closePoints[rowIndex].push([columnIndex, gaussianWeight])
+            }
+        })
+    )
+    const asDictionary = {}
+    closePoints.forEach((row, rowIndex) => {
+        if(row.length > 0) {
+            asDictionary[rowIndex] = row
+        }
+    })
+    return asDictionary;
+}
+
+const updatePoints = (closePoints, isLeftClick) => {
+    const closePointsIndices = Object.keys(closePoints);
+    const multiplier = (isLeftClick ? -1 : 1) * brushStrength;
+    const horizonDrawerData = {}
+    plot.selectAll("path")
+        .filter((_, i) => closePoints.hasOwnProperty(i))
+        .transition().duration(interval)
+        .attr("d", (d, i) => {
+            closePoints[closePointsIndices[i]].forEach(columnAndWeight =>
+                d[columnAndWeight[0]][1] += columnAndWeight[1] * multiplier
+            )
+            horizonDrawerData[i] = horizonDrawer(d)
+            return horizonDrawerData[i]
+        })
+
+    defs.selectAll("path")
+        .filter((_, i) => closePoints.hasOwnProperty(i))
+        .transition().duration(interval)
+        .attr("d", (d, i) => {
+            return `${horizonDrawerData[i]}L${width},${height}L0,${height}L0,${d[0][1]}`
+        })
+
+    // points.selectAll("circle")
+    //     .transition().duration(interval)
+    //     .attr("cx", d => d[0])
+    //     .attr("cy", d => d[1])
+}
+
+</script>

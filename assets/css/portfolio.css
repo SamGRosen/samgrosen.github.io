@@ -1,0 +1,23 @@
+img {
+    width: 100%;
+    box-shadow: rgb(170, 170, 170) 0px 0.2em 0.8em;
+}
+
+.post-title {
+    text-align: center;
+    font-size: 2em;
+    text-decoration: none;
+}
+
+.post__extra {
+    display: flex;
+    justify-content: space-between;
+    background-color: aliceblue;
+    padding: 1em;
+    border-radius: 1em;
+    box-shadow: rgb(170, 170, 170) 0px 0.2em 0.8em;
+}
+
+.post__description {
+    margin: 1em;
+}

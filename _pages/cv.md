@@ -114,8 +114,8 @@ Skills and Interests
 * **Related Technologies:** Linux, Git, React, Redux, HTML/CSS, Node.js, Gremlin, NumPy, Maven, JUnit, MySQL, libGDX, PIL, AWS Lambda, DynamoDB, S3, D3.js, THREE.js, C# Make
 * **Selected Coursework:** Data Structures, Statistical Networks, Mathematical Modeling, Stat I and II, Algorithms, Data Visualization, Graphics, Computer Systems, Numerical Analysis, Simulation, Time Series
 
-Selected Projects
-======
+<!-- Selected Projects -->
+<!-- ====== -->
 <hr />
 
   <ul>{% for post in site.publications %}
