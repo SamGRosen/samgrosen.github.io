@@ -164,7 +164,7 @@ function drawPlot(nodes) {
         .attr("x", margin.left + width / 2)
         .attr("y", margin.top + height + margin.bottom - 5)
         .attr("text-anchor", "middle")
-        .text("Colors seen by player");
+        .text("Colors in by player's memory");
 
     svg.append("text")
         .attr('id', 'title-axis-y')

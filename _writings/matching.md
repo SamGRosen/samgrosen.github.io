@@ -65,7 +65,7 @@ Let the number of distinct card *colors* in a player's memory and the number of 
 
 When there are still unseen cards ($\beta > 0$) we can break down state changes and probabilities from player moves as follows:
 
-* The first chosen card's color in memory so a pair is completed: 
+* The first chosen card's color is in memory so a pair is completed: 
   \begin{align\*} P(X_{t+1} = (\alpha - 1, \beta - 1 ) \vert X_{t} = (\alpha, \beta)) & = P(c_1 \in M)  \\\\ & = \min\left(\frac{\alpha}{\beta}, 1\right) \end{align\*} 
   * $\alpha$ and $\beta$ both decrease by 1, as we have removed a single color from memory and its pairing card from the set of unviewed cards.
   * As the complement, the probability that a first chosen card has an unseen color is $P(c_1 \notin M) = \left(1 - \min\left(\frac{\alpha}{\beta}, 1\right)\right) = \max\left(0, 1 - \frac{\alpha}{\beta}\right) $
@@ -239,7 +239,7 @@ The Royal Farms iOS app has a matching game for users where the reward for compl
     <img src="/images/royal-farms-2.png">
 </div>
 
-I wrote this article in the middle of the COVID-19 pandemic, so to check if Royal Farms was open late at night I downloaded their app. I was inspired to look into this problem since the game struck out to me -- is it fair to expect a user to complete the matching game with less than 5 failing moves? The game has 8 initial pairs, so by our calculations the expected number of failures to complete the game is about 4.39 moves. Continuing our calculations, we find that finishing the game with less than 5 failing moves is about 55%, *if* the user plays perfectly.
+I wrote this article in the middle of the COVID-19 pandemic, so to check if Royal Farms was open late at night I downloaded their app. I was inspired to look into this problem since the game struck out to me -- is it fair to expect a user to complete the matching game with less than 5 failing moves? The game has 8 initial pairs, so by our calculations the expected number of failures to complete the game is about 4.39. Continuing our calculations, we find the chance to finish the game with less than 5 failing moves is about 55%, *if* the user plays perfectly.
 
 Sources
 ------
