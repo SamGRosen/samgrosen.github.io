@@ -130,6 +130,7 @@ const numColumns = 80;
 const numLines = numColumns;
 const lineWidth = height / 300;
 const strengthCutoff = .1 / ((1000 / interval) * brushStrength); // Ensures we remove processing points that will not increase by .1 pixel/second
+const spaceBetweenLines = (height - numLines * lineWidth) / (numLines - 1)
 
 const terrain = [...Array(numLines).keys()].map(y => {
     return [...Array(numColumns).keys()].map(x =>
@@ -194,14 +195,25 @@ const groups = plot.selectAll(".path-group")
     .append("g")
 
 // Draw horizon fillers
+/* 
+    The initial version of this had each of these filler rectangles take up the entire canvas
+    and rely on clipping and rectangles lying on top of one another to filter out the excess
+    filling. This works fine with a GPU because it is able to rasterize the rectangles very fast.
+    However, Safari by default does not do GPU rendering and instead rasterizes with the CPU 
+    causing large amounts of lag. This new version now has dynamically sized filler rectangles 
+    to reduce the amount of processing needed to do rasterization. We greedily calculate the 
+    height of the rectangles by simply looking at the bottom of the bounding box of the upcoming 
+    rectangle. Speed is improved quite a bit, but this method will revert back to slow speeds if
+    the map becomes filled with horizons of great height/depth.
+*/
 groups
     .append("rect")
     .attr("class", "filler")
     .attr("fill", (_, i) => d3.interpolateGreys(i/numLines))
     .attr("x", 0)
-    .attr("y", 0)
+    .attr("y", d => d[0][1] - 2 * lineWidth)
     .attr("width", width)
-    .attr("height", height)
+    .attr("height", spaceBetweenLines + 3 * lineWidth)
     .attr("clip-path", (_, i) => `url(#clip-path-${i})`)
 
 // Draw horizons
@@ -254,9 +266,10 @@ const updatePoints = (closePoints, isLeftClick) => {
     const closePointsIndices = Object.keys(closePoints);
     const multiplier = (isLeftClick ? -1 : 1) * brushStrength;
     const horizonDrawerData = {}
+    const boundingBoxData = [];
+
     plot.selectAll("path")
         .filter((_, i) => closePoints.hasOwnProperty(i))
-        .transition().duration(interval)
         .attr("d", (d, i) => {
             closePoints[closePointsIndices[i]].forEach(columnAndWeight =>
                 d[columnAndWeight[0]][1] += columnAndWeight[1] * multiplier
@@ -267,9 +280,26 @@ const updatePoints = (closePoints, isLeftClick) => {
 
     defs.selectAll("path")
         .filter((_, i) => closePoints.hasOwnProperty(i))
-        .transition().duration(interval)
         .attr("d", (d, i) => {
             return `${horizonDrawerData[i]}L${width},${height}L0,${height}L0,${d[0][1]}`
+        })
+
+    plot.selectAll("path")
+        .each(function (d, i) {
+            const boundingBox = this.getBBox()
+            boundingBoxData.push({
+                y: boundingBox.y,
+                height: boundingBox.height
+            });
+        })
+
+    plot.selectAll("rect")
+        .attr("y", (d, i) => boundingBoxData[i].y - lineWidth)
+        .attr("height", (d, i) => {
+            if(i == boundingBoxData.length - 1) {
+                return height - boundingBoxData[i].y;
+            }
+            return boundingBoxData[i+1].y - boundingBoxData[i].y + boundingBoxData[i+1].height + 2 * lineWidth;
         })
 
     // points.selectAll("circle")
