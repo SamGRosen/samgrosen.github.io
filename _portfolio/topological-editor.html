@@ -54,6 +54,10 @@ layout: none
         cursor: pointer;
     }
 
+    .active {
+        text-shadow: 1px 1px 2px red, 0 0 1em blue, 0 0 0.2em white;
+    }
+
 
 </style>
 
@@ -67,6 +71,7 @@ layout: none
 
 <div id="tray" class="header-layout">
     <i class="fas fa-paint-brush" aria-hidden="true"></i>
+    <i class="fas fa-tint" aria-hidden="true"></i>
 </div>
 
 
@@ -88,7 +93,7 @@ d3.select("#icons > .fa-question")
             .style("top", "-100px")
     })
 
-// Add color button
+// Add color scale button
 const colorScales = [
     d3.interpolateGreys,
     d3.scaleLinear() // constant color
@@ -102,14 +107,31 @@ const colorScales = [
 ];
 
 let colorScaleIndex = 0;
+let isColorFill = false;
+let rectFiller = () => isColorFill && colorScaleIndex >= 2 ? dynamicColorScale : (_, i) => d3.interpolateGreys(i/numLines)
+
 d3.select("#tray > .fa-paint-brush")
     .on("click", function() {
         colorScaleIndex = (colorScaleIndex + 1) % colorScales.length;
         plot.selectAll("path")
             .transition().duration(1000)
             .attr("stroke", dynamicColorScale)
+        plot.selectAll("rect")
+            .transition().duration(1000)
+            .attr("fill", rectFiller())
     })
 
+// Add change fill button
+d3.select("#tray > .fa-tint")
+    .on("click", function() {
+        isColorFill = !isColorFill;
+        d3.select(this)
+            .classed("active", isColorFill)
+
+        plot.selectAll("rect")
+            .transition().duration(1000)
+            .attr("fill", rectFiller())
+    });
 
 const width = document.body.clientWidth;
 const height = document.body.clientHeight; 
@@ -144,8 +166,6 @@ const horizonDrawer = d3.line()
     .y(d => d[1]);
 
 const dynamicColorScale = (_, i) => colorScales[colorScaleIndex](i/numLines)
-
-const rectFill = "#FFF";
 
 let downTimer = undefined
 
