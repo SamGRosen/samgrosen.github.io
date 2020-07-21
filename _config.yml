@@ -188,7 +188,7 @@ defaults:
   # _portfolio
   - scope:
       path: ""
-      type: portfolio
+      type: Portfolio
     values:
       layout: single
       author_profile: true
@@ -197,7 +197,7 @@ defaults:
   # _writings
   - scope:
       path: ""
-      type: writings
+      type: Writings
     values:
       layout: single
       author_profile: true
