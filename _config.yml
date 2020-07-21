@@ -175,10 +175,10 @@ kramdown:
 
 # Collections
 collections:
-  Portfolio:
+  portfolio:
     output: true
     permalink: /:collection/:path/
-  Writings:
+  writings:
     output: true
     permalink: /:collection/:path/
 
@@ -188,7 +188,7 @@ defaults:
   # _portfolio
   - scope:
       path: ""
-      type: Portfolio
+      type: portfolio
     values:
       layout: single
       author_profile: true
@@ -197,7 +197,7 @@ defaults:
   # _writings
   - scope:
       path: ""
-      type: Writings
+      type: writings
     values:
       layout: single
       author_profile: true
