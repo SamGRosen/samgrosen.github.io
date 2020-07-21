@@ -1,6 +1,6 @@
 ---
 layout: archive
-title: "S. Rosen"
+title: "S. Rosen - CV"
 permalink: /cv/
 author_profile: true
 redirect_from:

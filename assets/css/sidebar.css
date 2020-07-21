@@ -1,0 +1,11 @@
+#email-info > span {
+    transition: opacity 0.3s;
+}
+
+#email-info > span:first-child {
+    opacity: 1;
+}
+
+#email-info > span:last-child {
+    opacity: 0;
+}
