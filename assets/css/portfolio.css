@@ -19,5 +19,6 @@ img {
 }
 
 .post__description {
+    width: 150%;
     margin: 1em;
 }

@@ -1,0 +1,654 @@
+---
+title: "Random Dot Product Graph Sampler"
+description: "A Latent Position Graph is a type of random graph model where vertices are associated with positions in some latent (unobserved) space. The Random Dot Product Graph (RDPG) is a Latent Position Graph. There are several definitions in the literature, but in this case we define it as a model where every vertex is associated with a vector of magnitude less than or equal to 1. The dot product of two vectors becomes the probability of an edge between the two associated vertices. This sampler allows the user to create vectors in a 3D latent space, and sample the resulting distribution."
+imgLink: "/images/rdpg-sampler.png"
+sourceCode: "https://github.com/SamGRosen/samgrosen.github.io/blob/master/_portfolio/rdpg-sampler.html"
+collection: portfolio
+layout: none
+---
+
+<link rel="stylesheet" href="{{ base_path }}/assets/css/main.css">
+
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
+  #icons {
+    position: absolute;
+      top: 1em;
+      margin: 0;
+      position: absolute;
+      left: 1em;
+  }
+
+  #icons > a {
+      text-decoration: none;
+      color:rgb(73, 78, 82)
+  }
+
+  #icons i {
+      margin: 0 0.5em;
+      line-height: inherit;
+  }
+
+  #icons > span {
+      position: fixed;
+      background-color: #FFF;
+      padding: 0 0.5em;
+      box-shadow: rgb(170, 170, 170) 0px 0.2em 0.8em;
+  }
+
+  p {
+    margin: 0;
+    font-weight: 300;
+  }
+
+  #directions {
+    position: absolute;
+    top: -10000px;
+    text-align: left;
+    left: 45%;
+    width: 40%;
+    padding: 1em;
+    font-size: .9em;
+    background-color: rgba(230, 230, 230, 0.9);
+    border-radius: 1em;
+    transition: top 0.3s;
+  }
+
+  #directions > p {
+    margin-bottom: 1em;
+  }
+
+  #wrapper {
+    display: flex;
+    height: 100%;
+    width: 100%;
+  }
+
+  #sidebar {
+    width: fit-content;
+    height: 100%;
+    background: #fcfcfc;
+    box-shadow: black 0em 0 1em 0.1em;
+    font-size: 1em;
+    line-height: 1em;
+  }
+
+  #controls {
+    display: grid;
+    row-gap: 1em;
+    margin-top: 2em;
+    text-align: center;
+  }
+
+  #controls button {
+    margin: 0 2em;
+    padding: .2em .4em;
+  }
+
+  #controls select {
+    margin: 1em;
+  }
+
+  #graphs {
+    width: 60%;
+    flex-grow: 1;
+  }
+
+</style>
+
+<div id="icons" class="header-layout">
+  <a href="/">
+    <i class="fas fa-home" aria-hidden="true"></i>
+  </a>
+  <i class="fas fa-question" aria-hidden="true" onclick="openHelp()" style="cursor:pointer"></i>
+</div>
+
+<div id="wrapper">
+  <div id="sidebar">
+  <div id="window"></div>
+  <div id="controls">
+    <p>Random Dot Product Graph Sampler</p>
+    <span id="directions">
+      <p style="font-weight:900; text-align: right; cursor: pointer; font-size: 1.1em" onclick="closeHelp()"> X </p>
+      <p>
+      A Latent Position Graph is a type of random graph model where vertices are associated with positions in some latent (unobserved) space. 
+      The Random Dot Product Graph (RDPG) is a Latent Position Graph. There are several definitions in the literature, but in this case we define it as
+      a model where every vertex is associated with a vector of magnitude less than or equal to 1. The dot product of two vectors becomes the 
+      probability of an edge between the two associated vertices. Because probabilities are positive, we restrict the vectors to have all positive components.
+      The latent space of a RDPG can be in any amount of dimensions, but for this program it is restricted to 3 dimensions for visualization purposes.
+      </p>
+      <p>
+      You can add vectors to the latent space by clicking on the surface of the light blue sphere. Scrolling your mousewheel on top of the plot will cause
+      the radius of the light blue sphere to increase or decrease to allow you to add vectors in the entire octant. Clicking and dragging on the plot will
+      allow you to view it from any angle. After you have added your latent positions click the "Sample Graph" button to view a graph that is sampled from the
+      distribution created in the plot. The color of each node in the graph will correspond to the color of a point in the plot. The opacity of the links is
+      related to the probability where lighter links indicate a smaller probability. When hovering over a node,
+      its respective latent position point in the plot will increase in size. There is a collection of preset latent positions to use. The controls are listed
+      below for convenience.
+      </p>
+
+      <ul>
+        <li> Click and drag on plot: change view </li>
+        <li> Click on blue surface: add latent position point </li>
+        <li> Scroll on plot: increase/decrease size of blue surface </li>
+        <li> Hover over node: show corresponding point in plot </li>
+        <li> "Sample Graph" button: sample a graph from the created RDPG distribution </li>
+        <li> "Clear Points" button: clear points on the plot </li>
+        <li> "Choose a preset..." dropdown: choose a starting set of points to place in the plot </li>
+        <li> "Help / Directions" button: open this menu </li>
+      </ul>
+
+    
+    </span>
+
+    <div>
+      <button type="button" id="clear"> Clear Points </button>
+      <button type="button" id="sample"> Sample Graph </button>
+    </div>
+    <div>
+      <label for="preset-select">Choose a preset set of latent positions:</label>
+      <br />
+      <select name="preset" id="preset-select">
+          <option value="0">(Optional)</option>
+          <option value="1">Borders</option>
+          <option value="2">Swiss Roll</option>
+          <option value="3">Clusters</option>
+          <option value="4">Perpendicular Planes</option>
+          <option value="5">Sphere</option>
+      </select>
+    </div>
+  </div>
+  </div>
+  <div id="graphs"></div>
+
+</div>
+
+<script type="text/javascript" src="/assets/js/libraries/cola.min.js"></script>
+<script type="text/javascript" src="/assets/js/libraries/mathjs.min.js"></script>
+<script type="text/javascript" src="/assets/js/libraries/three.min.js"></script>
+<script type="text/javascript" src="/assets/js/libraries/OrbitControls.js"></script>
+<script type="text/javascript" src="/assets/js/libraries/d3.v5.min.js"></script>
+
+
+<script type="text/javascript">
+// Dimensions
+const getSideLength = () => Math.min(window.innerHeight * .65, window.innerWidth * .4); 
+let sideLength = getSideLength();
+let width = sideLength;
+let height = sideLength;
+let rho = 0.4
+
+window.addEventListener( 'resize', onWindowResize, false );
+function onWindowResize(){
+    sideLength = getSideLength();
+    width = sideLength;
+    height = sideLength;
+    camera.aspect = 1;
+    camera.updateProjectionMatrix();
+
+    renderer.setSize( sideLength, sideLength );
+}
+
+// Create camera
+const fov = 45;
+const aspect = width / height;
+const near = 1;
+const far = 1000;
+const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+camera.position.set(1.7, 1.7, 1.7)
+camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+// Boundary Curves for inner shell
+const boundaryCurves = (radius, color) => {
+  const curve = new THREE.EllipseCurve(
+    0,  0,            // ax, aY
+    radius, radius,   // xRadius, yRadius
+    0,   Math.PI/2,   // aStartAngle, aEndAngle
+  );
+  const points = curve.getPoints( 80 );
+
+  const curveGeometry = new THREE.BufferGeometry().setFromPoints(points);
+  const curveMaterial = new THREE.LineBasicMaterial( { color : color } );
+
+  const ellipse1 = new THREE.Line( curveGeometry, curveMaterial );
+  ellipse1.rotateOnAxis(new THREE.Vector3(1, 0, 0), Math.PI/2);
+
+  const ellipse2 = new THREE.Line( curveGeometry, curveMaterial );
+  ellipse2.rotateOnAxis(new THREE.Vector3(0, 1, 0), -Math.PI/2);
+
+  const ellipse3 = new THREE.Line( curveGeometry, curveMaterial );
+
+  return [ellipse1, ellipse2, ellipse3];
+}
+const innerBoundaries = boundaryCurves(rho, 0);
+
+// Boundary curves for outer shell
+const outerBoundaries = boundaryCurves(1, 0xAAAAAA)
+
+
+// Axes Lines
+const createAxis = (toPoint, ticks=10) => {
+  const axis = toPoint.indexOf(1);
+  const points = [...Array(ticks).keys()].map(i => ({
+      x: toPoint[0] * i/(ticks-1),
+      y: toPoint[1] * i/(ticks-1),
+      z: toPoint[2] * i/(ticks-1)
+    })
+  )
+  let modifier;
+  switch(axis) {
+    case 0: // x
+      modifier = [0, 0.05, 0];
+      break;
+    case 1: // y
+      modifier = [0.05, 0, 0];
+      break;
+    case 2: // z
+      modifier = [-0.05, 0, 0.05];  
+      break;
+  }
+  const tickPoints = [...Array(ticks).keys()].map(i =>
+    [{x: points[i].x - modifier[0], y: points[i].y - modifier[1], z: points[i].z - modifier[2]},
+      points[i],
+      {x: points[i].x + modifier[0], y: points[i].y + modifier[1], z: points[i].z + modifier[2]}]
+  );
+  var axisMaterial = new THREE.LineBasicMaterial( { color : 0xAAAAAA } );
+  var axisGeom = new THREE.BufferGeometry().setFromPoints( points );
+  var tickGeoms = tickPoints.map(tick => new THREE.BufferGeometry().setFromPoints( tick ));
+  
+  return [axisGeom, ...tickGeoms].map(geom => new THREE.Line(geom, axisMaterial)); 
+}
+
+axes = [createAxis([1, 0, 0]), createAxis([0, 1, 0]), createAxis([0, 0, 1])].flatMap(lines => lines);
+
+// Shells
+const shellMaterial = new THREE.MeshPhongMaterial( { color: 0x0000FF} );
+shellMaterial.side = THREE.DoubleSide;
+shellMaterial.transparent = true;
+shellMaterial.opacity = 0.1;
+
+const innerShellGeometry = new THREE.SphereBufferGeometry(rho, 50, 50, Math.PI / 2, Math.PI / 2, 0, Math.PI / 2);
+const adjustableShell = new THREE.Mesh(innerShellGeometry, shellMaterial);
+
+const outerShellMaterial = shellMaterial.clone()
+outerShellMaterial.opacity = 0.01;
+outerShellMaterial.depthWrite = false;
+const outerShellGeometry = new THREE.SphereGeometry(1, 50, 50, Math.PI / 2, Math.PI / 2, 0, Math.PI / 2);
+
+// set opacity to 50%
+const shell = new THREE.Mesh(outerShellGeometry, outerShellMaterial);
+
+
+
+// Build scene
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xfcfcfc);
+
+scene.add(shell);
+scene.add(adjustableShell);
+
+for(const line of axes) {
+  scene.add(line); 
+}
+
+for(const boundary of outerBoundaries) {
+  scene.add(boundary); 
+}
+for(const boundary of innerBoundaries) {
+  scene.add(boundary); 
+}
+
+
+const mainLight = new THREE.DirectionalLight(0xffffff, 1.0);
+mainLight.position.set(1, 1, 1);
+
+const ambientLight = new THREE.HemisphereLight(0x000000, 0x000000, 1);
+
+scene.add(mainLight)
+
+// Render
+const renderer = new THREE.WebGLRenderer({antialias: true});
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.enableZoom = false;
+// invalidation.then(() => (controls.dispose(), renderer.dispose()));
+renderer.setSize(width, height);
+renderer.setPixelRatio(devicePixelRatio);
+controls.addEventListener("change", () => renderer.render(scene, camera));
+renderer.render(scene, camera);
+window.onload = function(e) {
+  document.getElementById('window').appendChild(renderer.domElement);
+}
+
+// https://github.com/mrdoob/three.js/blob/219e3c1bc24163e2c31ab6f5cf4bb66f81b689bc/docs/scenes/geometry-browser.html
+function updateRho(newRho) {
+  adjustableShell.geometry.dispose();
+  adjustableShell.geometry = 
+							new THREE.SphereBufferGeometry(
+								newRho, 50, 50, Math.PI / 2, Math.PI / 2, 0, Math.PI / 2
+              );
+  const newBoundaries = boundaryCurves(newRho, 0);
+  for(let i = 0; i < newBoundaries.length; i++) {
+    innerBoundaries[i].geometry.dispose();
+    innerBoundaries[i].geometry = newBoundaries[i].geometry
+  }
+  renderer.render(scene, camera);
+}
+
+function updateGroupGeometry( mesh, geometry ) {
+  if ( geometry.isGeometry ) {
+    geometry = new THREE.BufferGeometry().fromGeometry( geometry );
+    console.warn( 'THREE.GeometryBrowser: Converted Geometry to BufferGeometry.' );
+  }
+  mesh.geometry.dispose();
+  mesh.geometry = geometry; 
+}
+
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+raycaster.setFromCamera(mouse, camera);
+
+
+const presentPoints = new THREE.Group();
+scene.add(presentPoints);
+function addPoint(event) {
+  event.preventDefault()
+  // console.log(event)
+  // calculate mouse position in normalized device coordinates
+  // (-1 to +1) for both components
+  // console.log(window.innerWidth, window.innerHeight)
+  mouse.x = (event.clientX / width) * 2 - 1;
+  mouse.y = - (event.clientY / height) * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
+  var intersects = raycaster.intersectObject(adjustableShell);
+  if(intersects.length > 0) {
+    const intersected = intersects[0];
+    var dotGeometry = new THREE.Geometry();
+    dotGeometry.vertices.push(intersected.point);
+    var dotMaterial = new THREE.PointsMaterial( { size: 5, sizeAttenuation: false, color: 0xff0000 } );
+    var dot = new THREE.Points( dotGeometry, dotMaterial );
+    // scene.add( dot );
+    presentPoints.add( dot );
+    renderer.render(scene, camera);
+  }
+}
+
+function wheelRho(event) {
+  rho += event.deltaY / 3000;
+  rho = Math.min(1, rho);
+  rho = Math.max(0.01, rho);
+  updateRho(rho)
+}
+
+////////////////////////
+// Add sidebar controls:
+////////////////////////
+renderer.domElement.addEventListener("click", addPoint)
+renderer.domElement.addEventListener("wheel", wheelRho)
+
+
+const vertexColorScheme = (pointIndex, forD3=false) => {
+  // easiest to tell apart with this interpolator but the endpoint is white so we cut it off
+  const color = d3.interpolateRainbow(pointIndex / (presentPoints.children.length - 1))  
+  if(forD3) {
+    return color;
+  }
+  const colorComponents = color.slice(4).replace(")", "").split(", ").map(d => parseInt(d)/255)
+  return {r: colorComponents[0], g: colorComponents[1], b: colorComponents[2]};
+}
+
+const sampleAdjacencyInfo = (matrix) => {
+  console.log(matrix);
+  const nodes = [...Array(matrix._size[0]).keys()].map(i => ({id: i}));
+  const links = []
+  for(let row = 0; row < matrix._size[0]; row++) {
+    for(let column = row + 1; column < matrix._size[1]; column++) {
+      if(Math.random() < matrix._data[row][column]) {
+        links.push({
+          source: row,
+          target: column,
+          probability: matrix._data[row][column]
+        })
+      }
+    }
+  }
+  return {nodes, links};
+}
+
+
+const sampleButton = document.getElementById("sample")
+sampleButton.addEventListener("click", event => {
+  if(presentPoints.children.length == 0) {
+    return;
+  }
+
+  for(let i = 0; i < presentPoints.children.length; i++) {
+    presentPoints.children[i].material.color = vertexColorScheme(i)
+  }
+  renderer.render(scene, camera);
+
+  const asMatrix = math.matrix(presentPoints.children.map(child => Object.values(child.geometry.vertices[0])))
+  const dotProductResults = math.multiply(asMatrix, math.transpose(asMatrix))
+  const {nodes, links} = sampleAdjacencyInfo(dotProductResults);
+  console.log(nodes,links)
+  const drag = simulation => {
+  
+  function dragstarted(d) {
+    if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+    d.fx = d.x;
+    d.fy = d.y;
+  }
+  
+  function dragged(d) {
+    d.fx = d3.event.x;
+    d.fy = d3.event.y;
+  }
+  
+  function dragended(d) {
+    if (!d3.event.active) simulation.alphaTarget(0);
+    d.fx = null;
+    d.fy = null;
+  }
+  
+  return d3.drag()
+      .on("start", dragstarted)
+      .on("drag", dragged)
+      .on("end", dragended);
+  }
+
+  d3.select("#graph-one")
+    .remove()
+
+
+  const svg = d3.select("#graphs")
+      .append("svg")
+      .attr("id", "graph-one")
+      .attr("width", "100%")
+      .attr("height", "100%")
+
+  const svgWidth = svg.style("width").replace("px", "")
+  const svgHeight =  svg.style("height").replace("px", "")
+
+  // svg.attr("viewBox", [-svgWidth / 2, -svgHeight / 2, svgWidth, svgHeight]);
+
+
+  console.log(svgWidth, svgHeight)
+
+  const layout = cola.d3adaptor(d3)
+      .size([svgWidth, svgHeight])
+      .nodes(nodes)
+      .links(links)
+      .linkDistance(125)
+      .avoidOverlaps(true)
+      .start(50);
+
+  const link = svg.append("g")
+    .attr("stroke", "#444")
+    .selectAll("line")
+    .data(links)
+    .join("line")
+    .attr("stroke-opacity", d => Math.max(d.probability, .05))
+    .attr("stroke-width", d => 1);
+
+  const node = svg.append("g")
+      .attr("stroke", "#000")
+      .attr("stroke-width", 1.5)
+    .selectAll("circle")
+    .data(nodes)
+    .join("circle")
+      .attr("r", 6)
+      .attr("fill", (d) => vertexColorScheme(d.id, forD3=true))
+      .on("mouseenter", d => {presentPoints.children[d.id].material.size = 13; renderer.render(scene, camera);})
+      .on("mouseleave", d => {presentPoints.children[d.id].material.size = 5; renderer.render(scene, camera);})
+      .call(layout.drag);
+
+  node.append("title")
+      .text(d => d.id);
+
+  layout.on("tick", () => {
+    link
+        .attr("x1", d => d.source.x)
+        .attr("y1", d => d.source.y)
+        .attr("x2", d => d.target.x)
+        .attr("y2", d => d.target.y);
+
+    node
+        .attr("cx", d => d.x)
+        .attr("cy", d => d.y);
+  });
+});
+
+
+const clearButton = document.getElementById("clear")
+clearButton.addEventListener("click", event => {
+  presentPoints.children.length = 0; // Remove all points
+  renderer.render(scene, camera);
+})
+
+
+const openHelp = () => document.getElementById("directions").style["top"] = "1em";
+const closeHelp = () => document.getElementById("directions").style["top"] = "-10000px";
+
+
+const createPoint = (x, y, z) => {
+  var dotGeometry = new THREE.Geometry();
+  const toAdd = new THREE.Vector3(x, y, z)
+  dotGeometry.vertices.push(toAdd);
+  var dotMaterial = new THREE.PointsMaterial( { size: 5, sizeAttenuation: false, color: 0xff0000 } );
+  return  new THREE.Points( dotGeometry, dotMaterial )
+}
+
+// Perpendicular Planes
+const detail = 7;
+const presets = [...Array(7).keys()].map(() => []);
+for(let x = 0; x < detail; x++) {
+  for(let y = 0; y < detail; y++) {
+    var dotGeometry = new THREE.Geometry();
+    const toAdd = new THREE.Vector3(x / (detail - 1), y / (detail - 1), 1/2)
+    if(toAdd.length() <= 1) {
+      dotGeometry.vertices.push(toAdd);
+      var dotMaterial = new THREE.PointsMaterial( { size: 5, sizeAttenuation: false, color: 0xff0000 } );
+      presets[4].push(new THREE.Points( dotGeometry, dotMaterial ));
+    }
+    var dotGeometry2 = new THREE.Geometry();
+
+    const toAdd2 = new THREE.Vector3(x / (detail - 1), 1/2, y / (detail - 1))
+    if(toAdd.length() <= 1) {
+      dotGeometry2.vertices.push(toAdd2);
+      var dotMaterial = new THREE.PointsMaterial( { size: 5, sizeAttenuation: false, color: 0xff0000 } );
+      presets[4].push(new THREE.Points( dotGeometry2, dotMaterial ));
+    }
+    
+  }
+}
+
+// Sphere
+const presetSphereGeom = new THREE.SphereGeometry(0.5/Math.sqrt(3), detail, detail);
+presetSphereGeom.translate(0.5/Math.sqrt(3), 0.5/Math.sqrt(3), 0.5/Math.sqrt(3))
+for(const point of presetSphereGeom.vertices) {
+  var dotGeometry = new THREE.Geometry();
+    dotGeometry.vertices.push(point);
+    var dotMaterial = new THREE.PointsMaterial( { size: 5, sizeAttenuation: false, color: 0xff0000 } );
+    presets[5].push(new THREE.Points( dotGeometry, dotMaterial ));
+}
+
+// Borders
+for(let i = 1; i < detail; i++) {
+  const theta = i * (Math.PI/2) / (detail)
+  presets[1].push(createPoint(Math.cos(theta), Math.sin(theta), 0) )
+  presets[1].push(createPoint(Math.sin(theta), 0, Math.cos(theta)) )
+  presets[1].push(createPoint(0, Math.cos(theta), Math.sin(theta)) )
+  presets[1].push(createPoint((i)/detail, 0, 0) )
+  presets[1].push(createPoint(0, (i)/detail, 0) )
+  presets[1].push(createPoint(0, 0, (i)/detail) )
+
+}
+presets[1].push(createPoint(0, 0, 0));
+presets[1].push(createPoint(1, 0, 0));
+presets[1].push(createPoint(0, 1, 0));
+presets[1].push(createPoint(0, 0, 1));
+
+
+const presetSelection = document.getElementById("preset-select")
+presetSelection.addEventListener("change", event => {
+  const value = parseInt(event.srcElement.value);
+
+  if(value > 0) {
+    presentPoints.children.length = 0; // Remove all points
+    for(const point of presets[value]) {
+      presentPoints.add(point)
+    }
+    renderer.render(scene, camera);
+  }
+})
+
+// Clusters
+const centers = [
+  new THREE.Vector3(0, 0, 0),
+  new THREE.Vector3(1/2, 1/4, 1/10),
+  new THREE.Vector3(4/6, 2/5, 2/5),
+  new THREE.Vector3(0, 5/6, 1/3),
+  new THREE.Vector3(1/4, 1/4, 3/4)
+]
+for(const center of centers) {
+  const clusterRadius = Math.random() * 0.2 + 0.1;
+  for(let i = 0; i < detail * 2; i++) {
+    const asPoint = new THREE.Vector3(center.x + clusterRadius * Math.random(), 
+                                      center.y + clusterRadius * Math.random(), 
+                                      center.z + clusterRadius * Math.random()) 
+    if(asPoint.length() <= 1) {
+      presets[3].push(createPoint(asPoint.x, asPoint.y, asPoint.z))
+    }
+  }
+}
+
+
+// Swiss Roll
+for(let x = 0; x < detail * 2; x++) {
+  for(let y = 0; y < detail; y++) {
+      const scaledX = 4.5 * x / (detail - 1)
+      const scaledY = y / (detail - 1)
+      const asPoint = new THREE.Vector3(1/3 + scaledX * 0.03 * Math.cos(scaledX), scaledY, 1/3 + scaledX * 0.03 * Math.sin(scaledX));
+      if(asPoint.length() <= 1) {
+        presets[2].push(createPoint(1/3 + scaledX * 0.03 * Math.cos(scaledX), scaledY, 1/3 + scaledX * 0.03 * Math.sin(scaledX)) )
+      }
+  }
+}
+
+
+</script>
+
+
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+    }
+  });
+</script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-MML-AM_CHTML' async></script>
