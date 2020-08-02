@@ -2,12 +2,16 @@
 const mindistance = 40;
 const inrange = ({ x: sx, y: sy }, { x: tx, y: ty }) => Math.hypot(sx - tx, sy - ty) <= mindistance;
 const clusterStyles = ["adjacency", "laplacian", "normLaplacian", "cosineSimilarity"];
-const height = 500 // remove to make dynamic;
-const width = height
+const nodeRadius = 5;
+const durationTime = 500;
 
 const clusterColors = d3.schemeTableau10.slice();
 clusterColors.push(...d3.schemeSet2);
 clusterColors.push(...d3.schemeSet3);
+
+const tooltip = d3.select("body")
+    .append("div")
+    .attr("id", "control-tooltip")
 
 const getAvailableColors = (numberOfClusters) => {
     // By pushing to clusterColors we ensure consistent cluster colors across views
@@ -26,19 +30,19 @@ const getConsistentClusters = (clusterAssignments) => { // O(numberNodes * numbe
         Allows user to add nodes without switching of cluster colors. */
     const possibleAssignments = [...new Set(clusterAssignments)]
     const firstIndexWithAssignment = new Map();
-    for(const assignment of possibleAssignments) {
+    for (const assignment of possibleAssignments) {
         firstIndexWithAssignment.set(assignment, clusterAssignments.indexOf(assignment))
     }
     const mappedToFirstIndex = clusterAssignments.map(d => firstIndexWithAssignment.get(d))
     const possibleIndices = [...new Set(firstIndexWithAssignment.values())]
-    possibleIndices.sort((a,b) => a - b);
+    possibleIndices.sort((a, b) => a - b);
     const mappedBackToOriginalIndexSpace = new Map();
     possibleIndices.forEach((firstIndex, newIndex) => mappedBackToOriginalIndexSpace.set(firstIndex, newIndex))
-    
+
     return mappedToFirstIndex.map(d => mappedBackToOriginalIndexSpace.get(d))
 }
 
-const adjacencySpectralEmbedding = (adjMatrix, numberOfClusters, scaled=true) => {
+const adjacencySpectralEmbedding = (adjMatrix, numberOfClusters) => {
     /* 
         The referenced paper wants scaled eigenvectors returned but it really does not matter since its
         just a transformation of the axis in the lower-dimensional space. The only potential difference
@@ -47,108 +51,74 @@ const adjacencySpectralEmbedding = (adjMatrix, numberOfClusters, scaled=true) =>
     const eigendecomp = math.eigs(adjMatrix)
     const eigenValues = eigendecomp.values.toArray();
     const copiedEigenValues = eigenValues.slice();
-    const topEigenValues = copiedEigenValues.sort((a,b) => Math.abs(b) - Math.abs(a)).slice(0, numberOfClusters);
+    const topEigenValues = copiedEigenValues.sort((a, b) => Math.abs(b) - Math.abs(a)).slice(0, numberOfClusters);
     const indicesOfTopEValues = topEigenValues.map(eValue => eigenValues.indexOf(eValue));
 
     const topEigenvectors = math.subset(eigendecomp.vectors,
         math.index(
-            math.range(0, adjMatrix.size()[0]), 
+            math.range(0, adjMatrix.size()[0]),
             indicesOfTopEValues
-            )
-        );
+        )
+    );
 
-    const toReturn = scaled ? math.multiply(topEigenvectors, math.diag(topEigenValues.map(e => math.sqrt(math.abs(e))))) : topEigenvectors
-    return toReturn._data;
+    return topEigenvectors._data;
 }
 
-const laplacianSpectralEmbedding = (adjMatrix, numberOfClusters, normalized=true, scaled=false) => {
-    console.log(adjMatrix)
+const laplacianSpectralEmbedding = (adjMatrix, numberOfClusters, normalized = true) => {
     const degree_vector = math.multiply(adjMatrix, math.ones(adjMatrix.size()[0]))
-    const degree_matrix = math.diag(degree_vector, "sparse")
+    const degree_matrix = math.diag(degree_vector.valueOf().map(d => d[0]), 0, "sparse")
     const laplacianMatrix = math.subtract(degree_matrix, adjMatrix);
-    // Assumes one connected component
     let matrix_to_eigen = laplacianMatrix;
-    if(normalized) {
+    if (normalized) {
         const invsqrtDegree_matrix = math.diag(
-            degree_vector.map(d => d !== 0 ? 1 / math.sqrt(d) : 0))
+            degree_vector.valueOf().map(d => d[0] !== 0 ? 1 / math.sqrt(d[0]) : 0))
         matrix_to_eigen = math.multiply(math.multiply(invsqrtDegree_matrix, laplacianMatrix), invsqrtDegree_matrix)
     }
-    console.log(matrix_to_eigen)
     const eigendecomp = math.eigs(matrix_to_eigen)
     const numComponents = eigendecomp.values.toArray().filter(e => e < 1e-10).length
-    console.log(eigendecomp)
     const topScaledEigenValues = eigendecomp.values.toArray().slice(numComponents, numComponents + numberOfClusters).map(e => math.sqrt(math.abs(e)))
     const topEigenvectors = math.subset(eigendecomp.vectors,
-            math.index(
-                math.range(0, adjMatrix.size()[0]),
-                math.range(numComponents, numComponents + numberOfClusters) // Laplacian based methods use first k non-trivial eigenvectors
-            ))
+        math.index(
+            math.range(0, adjMatrix.size()[0]),
+            math.range(numComponents, numComponents + numberOfClusters) // Laplacian based methods use first k non-trivial eigenvectors
+        ))
 
-    const toReturn = scaled ? math.multiply(topEigenvectors, topScaledEigenValues) : topEigenvectors;
-    return toReturn._data;
+    return topEigenvectors._data;
+}
 
+const getTopEigenvectors = (A, clusterStyle, numberOfClusters) => {
+    switch (clusterStyle) {
+        case "cosineSimilarity": // falls through to adjacency case
+            return adjacencySpectralEmbedding(math.multiply(A, math.transpose(A)), numberOfClusters);
+        case "adjacency":
+            return adjacencySpectralEmbedding(A, numberOfClusters);
+        case "laplacian":
+            return laplacianSpectralEmbedding(A, numberOfClusters, normalized = false);
+        case "normLaplacian":
+            return laplacianSpectralEmbedding(A, numberOfClusters, normalized = true);
+        default:
+            console.error(`Unrecognized clustering style: ${clusterStyle} !`)
+    }
 }
 
 const getClusterAssignments = (A, clusterStyle, numberOfClusters) => {
     const availableColors = getAvailableColors(numberOfClusters)
-    if (A.length <= 2) { // Will always partition each of two nodes into its own community
-        return availableColors.slice(1);
+    const actualClusters = Math.min(A.size()[0], numberOfClusters);
+
+    if (A.size()[0] <= 2) { // Will always partition each of two nodes into its own community
+        return {
+            clusterAssignments: availableColors.slice(0, 2),
+            topEigenvectors: [[1, 0], [0, 1]]
+        }
     }
 
-    let adj_as_matrix = math.matrix(A);
-    const actualClusters = Math.min(A.length, numberOfClusters);
-    let pertinentEigenVectors;
-    switch(clusterStyle) {
-        case "cosineSimilarity": // falls through to adjacency case
-            adj_as_matrix = math.multiply(adj_as_matrix, math.transpose(adj_as_matrix));
-        case "adjacency":
-            pertinentEigenVectors = adjacencySpectralEmbedding(adj_as_matrix, actualClusters);
-            break;
-        case "laplacian":
-            pertinentEigenVectors = laplacianSpectralEmbedding(adj_as_matrix, actualClusters, normalized=false);
-            break;
-        case "normLaplacian":
-            pertinentEigenVectors = laplacianSpectralEmbedding(adj_as_matrix, actualClusters, normalized=true);
-            break;
-        default:
-            console.error(`Unrecognized clustering style: ${clusterStyle} !`)
-    }
-    // Calculate clusters
-    console.log(pertinentEigenVectors)
-    // initialize model
-    // var gmm = new GMM({
-    //     weights: [0.5, 0.5],
-    //     means: [[1, 0], [0, 1]],
-    //     covariances: [
-    //         [[1,0],[0,1]],
-    //         [[1,0],[0,1]]
-    //     ]
-    // });
-
-    // // create some data points
-
-
-    // // add data points to the model
-    // pertinentEigenVectors.forEach(p => gmm.addPoint(p));
-
-    // // run 5 iterations of EM algorithm
-    // gmm.runEM(20);
-    // console.log(gmm)
-    // // predict cluster probabilities for point [-5, 25]
-
-    // const clusters = pertinentEigenVectors.map(p => 
-    //     gmm.predict(p).reduce((iMax, x, i, arr) => x > arr[iMax] ? i : iMax, 0))
-    // console.log(clusters)
-    // pertinentEigenVectors.forEach(p => console.log(gmm.predictNormalize(p)));
-    // var prob = gmm.predict([-5, 25]);  // [0.000009438559331418772, 0.000002126123537376676]
-
-    // predict and normalize cluster probabilities for point [-5, 25]
-    // var probNorm = gmm.predictNormalize([-5, 25]);  // [0.8161537535012295, 0.18384624649877046]
-
-
+    const pertinentEigenVectors = getTopEigenvectors(A, clusterStyle, actualClusters);
     const kmeans = new skmeans(pertinentEigenVectors, actualClusters);
-    // return getConsistentClusters(clusters).map(cluster => availableColors[cluster]);
-    return getConsistentClusters(kmeans.idxs).map(cluster => availableColors[cluster])
+    return {
+        kmeans,
+        clusterAssignments: getConsistentClusters(kmeans.idxs).map(cluster => availableColors[cluster]),
+        topEigenvectors: pertinentEigenVectors
+    }
 }
 
 const sampleSBM = (communitySizes, probabilityMatrix) => {
@@ -179,265 +149,512 @@ const sampleSBM = (communitySizes, probabilityMatrix) => {
     ).filter(link => link); // remove undefined
 
     const N = nodes.length;
-    const adjacency = [...Array(N).keys()].map( // Can't use fill to avoid aliasing same array
-        _ => new Array(N).fill(0)
-    )
-
+    const adjacency = math.sparse()
+    adjacency.resize([N, N])
     for (const link of links) {
-        adjacency[link.source][link.target] = 1;
-        adjacency[link.target][link.source] = 1;
+        adjacency.set([link.source, link.target], 1)
+        adjacency.set([link.target, link.source], 1)
     }
-
     const trueCommunities = communitySizes.flatMap((size, index) => new Array(size).fill(index))
 
-    return { nodes, links, adjacency, trueCommunities};
+    return { nodes, links, adjacency, trueCommunities };
 }
 
-const drag = simulation => {
-    function dragstarted(d) {
-        if (!d3.event.active) simulation.alphaTarget(0.3).restart();
-        d.fx = d.x;
-        d.fy = d.y;
+const calculateBoundary = (point1, point2) => {
+    const slope = (point2[1] - point1[1]) / (point2[0] - point1[0]);
+    const perpendicularSlope = -1 / slope
+    const midpoint = [(point1[0] + point2[0]) / 2, (point1[1] + point2[1]) / 2];
+    let x1, x2, y1, y2;
+    if (Math.abs(slope) < 1e-10) { // Vertical boundary
+        x1 = -1
+        y1 = midpoint[1];
+        x2 = 1
+        y2 = midpoint[1];
+    } else if (slope === Infinity) { // Horizontal boundary
+        x1 = midpoint[0];
+        y1 = -1
+        x2 = midpoint[0];
+        y2 = 1
+    } else {
+        x1 = (-1 + perpendicularSlope * midpoint[0] - midpoint[1]) / perpendicularSlope
+        y1 = -1;
+        x2 = (1 + perpendicularSlope * midpoint[0] - midpoint[1]) / perpendicularSlope
+        y2 = 1
     }
-
-    function dragged(d) {
-        d.fx = d3.event.x;
-        d.fy = d3.event.y;
-    }
-
-    function dragended(d) {
-        if (!d3.event.active) simulation.alphaTarget(0);
-        d.fx = null;
-        d.fy = null;
-    }
-
-    return d3.drag()
-        .on("start", dragstarted)
-        .on("drag", dragged)
-        .on("end", dragended);
+    return {
+        x1, y1,
+        x2, y2
+    };
 }
 
+const showTooltipWith = function (element, text) {
+    tooltip.text(text);
+    const rect = element.getBoundingClientRect();
+    tooltip.style("top", `${d3.event.pageY - 2 * rect.height}px`)
+    tooltip.style("left", `${d3.event.pageX - rect.width}px`)
+}
 
-const addGraphView = (intoElement, startingInfo = {nodes: [], links: [], adjacency: [], trueCommunities: []}) => {
-    const { nodes, links, adjacency, trueCommunities } = startingInfo;
-    let currentClusterNum = 2
-    let currentClusterStyleIndex = 0;
-    let mouse = null;
+const hideTooltip = () =>
+    tooltip.style("top", "-1000px")
 
-    // Begin layout info and framework
-    const simulation = d3.forceSimulation(nodes)
-        .force("charge", d3.forceManyBody().strength(-60))
-        .force("link", d3.forceLink(links))
-        .force("x", d3.forceX())
-        .force("y", d3.forceY())
-        .on("tick", ticked);
+class GraphView {
+    constructor(intoElement, startingGraph = {}) {
+        this.intoElement = intoElement;
+        this.width = undefined;
+        this.height = undefined;
 
-    const dragger = drag(simulation)
-        .on("start.mouse", mouseleft)
-        .on("end.mouse", mousemoved);
+        // Graph info
+        this.nodes = startingGraph.nodes || [];
+        this.links = startingGraph.links || [];
+        this.adjacency = startingGraph.adjacency || math.sparse();
+        this.trueCommunities = startingGraph.trueCommunities || [];
 
-    const svg = d3.select(intoElement)
-        .append("svg")
-        .attr("viewBox", [-width / 2, -height / 2, width, height])
-        .attr("cursor", "crosshair")
-        .on("mouseleave", mouseleft)
-        .on("mousemove", mousemoved)
-        .on("click", clicked);
+        // Rendering details
+        this.currentClusterNum = 2
+        this.currentClusterStyleIndex = 0;
+        this.mouse = null;
+        this.spectralLayout = false;
+    }
 
-    let link = svg.append("g")
-        .attr("stroke", "#999")
-        .selectAll("line");
+    onWindowResize() {
+        if (this.width) {
+            this.width = d3.select(this.intoElement).node().getBoundingClientRect().width;
+            this.height = this.width;
+            this.svg
+                .attr("viewBox", [-this.width / 2, -this.height / 2, this.width, this.height])
+        }
+    }
 
-    let mouselink = svg.append("g")
-        .attr("stroke", "red")
-        .selectAll("line");
+    initializeOntoDOM(empty = false) {
+        this.width = d3.select(this.intoElement).node().getBoundingClientRect().width;
+        this.height = this.width;
+        window.addEventListener("resize", this.onWindowResize);
 
-    let node = svg.append("g")
-        .selectAll("circle");
+        const viewInstance = this;
 
-    const cursor = svg.append("circle")
-        .attr("display", "none")
-        .attr("fill", "none")
-        .attr("stroke", "red")
-        .attr("r", mindistance - 5);
+        // Add graph layout ability
+        this.simulation = d3.forceSimulation(this.nodes)
+            .force("charge", d3.forceManyBody().strength(-60))
+            .force("link", d3.forceLink(this.links))
+            .force("x", d3.forceX())
+            .force("y", d3.forceY())
+            .on("tick", this.ticked.bind(this)); // ensure `this` is the class inside ticked
 
-    function ticked() {
-        node.attr("cx", d => d.x)
+        this.svg = d3.select(this.intoElement)
+            .append("svg")
+            .attr("viewBox",
+                [-this.width / 2 - nodeRadius,
+                -this.height / 2 - nodeRadius,
+                this.width + 2 * nodeRadius,
+                this.height + 2 * nodeRadius])
+            .attr("cursor", "crosshair")
+            .on("mouseleave", this.mouseleft.bind(this))
+            .on("mousemove", function () {
+                viewInstance.mousemoved(this)
+            })
+            .on("click", function () {
+                viewInstance.clicked(this)
+            });
+
+        this.link = this.svg.append("g")
+            .attr("stroke", "#999")
+            .selectAll("line");
+
+        this.node = this.svg.append("g")
+            .selectAll("circle");
+
+        // Add mouse interactivity
+        this.mouselink = this.svg.append("g")
+            .attr("stroke", "red")
+            .selectAll("line");
+
+        this.cursor = this.svg.append("circle")
+            .attr("display", "none")
+            .attr("fill", "none")
+            .attr("stroke", "red")
+            .attr("r", mindistance - 5);
+
+        // Add spectral layout clustering info
+        this.centroidPlot = this.svg.append("g")
+            .attr("id", "centroids")
+            .selectAll("circle");
+
+        this.boundary = this.svg.append("line")
+            .attr("stroke", "black")
+
+        this.addControls();
+
+        this.refitGraph();
+        this.rerenderGraph();
+
+        if (this.nodes.length === 0 && !empty) { // If no nodes and graph was not indicated to start empty, add a single node
+            this.spawn({ x: 0, y: 0 })
+        }
+    }
+
+    addControls() {
+        this.uiHolder = d3.select(this.intoElement)
+            .append("div")
+            .attr("class", "view-controls")
+
+        const changeStyleControls = this.uiHolder.append("div")
+            .on("mousemove", function () {
+                showTooltipWith(this, "Type of Spectral Embedding")
+            })
+            .on("mouseleave", hideTooltip);
+
+        changeStyleControls.append("i")
+            .attr("class", "fas fa-chevron-circle-left")
+            .on("click", this.prevClusterStyle.bind(this));
+
+        this.clusterStyleLabel = changeStyleControls.append("span")
+
+        changeStyleControls.append("i")
+            .attr("class", "fas fa-chevron-circle-right")
+            .on("click", this.nextClusterStyle.bind(this));
+
+        const changeClusterNumControls = this.uiHolder.append("div")
+            .on("mousemove", function () {
+                showTooltipWith(this, "Number of Clusters to Fit")
+            })
+            .on("mouseleave", hideTooltip);
+
+        changeClusterNumControls.append("i")
+            .attr("class", "fas fa-arrow-down")
+            .on("click", this.downClusterNum.bind(this));
+
+        this.numClustersLabel = changeClusterNumControls.append("span")
+
+        changeClusterNumControls.append("i")
+            .attr("class", "fas fa-arrow-up")
+            .on("click", this.upClusterNum.bind(this));
+
+        this.uiHolder.append("i")
+            .attr("class", "fas fa-trash")
+            .on("click", this.resetGraph.bind(this))
+            .on("mousemove", function () {
+                showTooltipWith(this, "Reset Graph")
+            })
+            .on("mouseleave", hideTooltip);
+
+        this.uiHolder.append("i")
+            .attr("class", "fas fa-retweet")
+            .on("click", () => { this.refitGraph(true); this.rerenderGraph() })
+            .on("mousemove", function () {
+                showTooltipWith(this, "Fit Clusters")
+            })
+            .on("mouseleave", hideTooltip);
+
+        // this.uiHolder.append("button")
+        //     .text("true communities (remove)")
+        //     .on("click", this.showTrueCommunities.bind(this));
+
+        this.uiHolder.append("i")
+            .attr("class", "fas fa-binoculars")
+            .on("click", this.toggleSpectralLayout.bind(this))
+            .on("mousemove", function () {
+                showTooltipWith(this, "Switch to/from Spectral Layout")
+            })
+            .on("mouseleave", hideTooltip);
+
+        this.updateLabels();
+    }
+
+    updateLabels() {
+        this.clusterStyleLabel.text(clusterStyles[this.currentClusterStyleIndex]);
+        this.numClustersLabel.text(`${this.currentClusterNum} Clusters`)
+    }
+
+    upClusterNum() {
+        this.currentClusterNum = this.currentClusterNum >= this.nodes.length ?
+            this.nodes.length : this.currentClusterNum + 1;
+        this.refitGraph();
+        this.rerenderGraph();
+        this.updateLabels();
+    }
+
+    downClusterNum() {
+        this.currentClusterNum = this.currentClusterNum <= 2 ?
+            2 : this.currentClusterNum - 1;
+        this.refitGraph();
+        this.rerenderGraph();
+        this.updateLabels();
+    }
+
+    nextClusterStyle() {
+        this.currentClusterStyleIndex = this.currentClusterStyleIndex === clusterStyles.length - 1 ?
+            0 : this.currentClusterStyleIndex + 1;
+        this.refitGraph();
+        this.rerenderGraph();
+        this.updateLabels();
+    }
+
+    prevClusterStyle() {
+        this.currentClusterStyleIndex = this.currentClusterStyleIndex === 0 ?
+            clusterStyles.length - 1 : this.currentClusterStyleIndex - 1;
+        this.refitGraph();
+        this.rerenderGraph();
+        this.updateLabels();
+    }
+
+    resetGraph() {
+        this.links.length = 0
+        this.nodes.length = 0
+        this.adjacency.resize([0, 0])
+        this.currentClusterNum = 2
+        this.updateLabels();
+        if (this.spectralLayout) {
+            this.toggleSpectralLayout()
+        }
+        this.spawn({ x: 0, y: 0 });
+    }
+
+    refitGraph(useCache = false) { // TODO Add more cacheing here
+        if (this.topEigenvectors && useCache) {
+            const availableColors = getAvailableColors()
+            this.kmeans = new skmeans(this.topEigenvectors, this.currentClusterNum);
+            this.clusterAssignments = getConsistentClusters(this.kmeans.idxs).map(cluster => availableColors[cluster]);
+        } else {
+            const clusteringInfo = getClusterAssignments(this.adjacency,
+                clusterStyles[this.currentClusterStyleIndex],
+                this.currentClusterNum);
+            this.clusterAssignments = clusteringInfo.clusterAssignments;
+            this.kmeans = clusteringInfo.kmeans
+            this.topEigenvectors = clusteringInfo.topEigenvectors;
+        }
+    }
+
+    showTrueCommunities() { // needs to be toggable
+        this.node.transition().duration(durationTime)
+            .attr("fill", (_, i) => {
+                return i >= this.trueCommunities.length ? "black" :
+                    clusterColors[this.trueCommunities[i]];
+            })
+            .attr("opacity", (_, i) => {
+                return i >= this.trueCommunities.length ? "0.2" :
+                    "1";
+            })
+    }
+
+    toggleSpectralLayout() {
+        if (this.spectralLayout) { // turn it off
+            this.spectralLayout = false;
+            this.simulation.nodes(this.nodes);
+            this.simulation.force("link").links(this.links);
+            this.simulation.alpha(1).restart();
+        } else {
+            this.simulation.stop()
+            this.spectralLayout = true;
+        }
+
+        this.rerenderGraph();
+
+        d3.select(`${this.intoElement} .fa-binoculars`)
+            .style("color", this.spectralLayout ? "#4682b4" : null)
+    }
+
+    ticked() {
+        this.node.attr("cx", d => d.x)
             .attr("cy", d => d.y)
 
-        link.attr("x1", d => d.source.x)
+        this.link.attr("x1", d => d.source.x)
             .attr("y1", d => d.source.y)
             .attr("x2", d => d.target.x)
             .attr("y2", d => d.target.y);
+    }
 
-        mouselink = mouselink
-            .data(mouse ? nodes.filter(node => inrange(mouse, node)) : [])
+    mouseleft() {
+        this.mouse = null;
+        this.cursor.attr("display", "none")
+        this.mouselink.attr("display", "none")
+    }
+
+    mousemoved(on) {
+        const [x, y] = d3.mouse(on);
+        this.mouse = { x, y };
+        this.cursor
+            .attr("display", this.mouse ? null : "none")
+            .attr("cx", this.mouse && this.mouse.x)
+            .attr("cy", this.mouse && this.mouse.y);
+
+        this.mouselink = this.mouselink
+            .data(this.mouse ? this.nodes.filter(node => inrange(this.mouse, node)) : [])
             .join("line")
-            .attr("x1", mouse && mouse.x)
-            .attr("y1", mouse && mouse.y)
+            .attr("x1", this.mouse && this.mouse.x)
+            .attr("y1", this.mouse && this.mouse.y)
             .attr("x2", d => d.x)
             .attr("y2", d => d.y);
-
-        cursor
-            .attr("display", mouse ? null : "none")
-            .attr("cx", mouse && mouse.x)
-            .attr("cy", mouse && mouse.y);
     }
 
-    function mouseleft() {
-        mouse = null;
+    clicked(on) {
+        this.mousemoved(on);
+        this.spawn({ x: this.mouse.x, y: this.mouse.y, index: this.nodes.length - 1 });
+        this.mousemoved(on);
     }
 
-    function mousemoved() {
-        const [x, y] = d3.mouse(this);
-        mouse = { x, y };
-        simulation.alpha(0.3).restart();
-    }
+    spawn(source) {
+        this.nodes.push(source);
+        this.adjacency.resize([this.nodes.length, this.nodes.length])
 
-    function clicked() {
-        mousemoved.call(this);
-        spawn({ x: mouse.x, y: mouse.y });
-    }
-
-    // Add ui elements
-    const uiHolder = d3.select(intoElement)
-        .append("div")
-        .attr("width", "100%")
-
-    uiHolder.append("button")
-        .text("<<")
-        .on("click", () => {
-            currentClusterStyleIndex = currentClusterStyleIndex === 0 ? 
-            clusterStyles.length - 1 : currentClusterStyleIndex - 1;
-            updateClusterStyle();
-            clusterStyleLabel.text(() => clusterStyles[currentClusterStyleIndex]);
-        })
-
-    const clusterStyleLabel = uiHolder.append("span")
-        .text(() => clusterStyles[currentClusterStyleIndex])
-    uiHolder.append("button")
-        .text(">>")
-        .on("click", () => {
-            currentClusterStyleIndex = currentClusterStyleIndex === clusterStyles.length - 1 ? 
-            0 : currentClusterStyleIndex + 1;
-            updateClusterStyle();
-            clusterStyleLabel.text(() => clusterStyles[currentClusterStyleIndex]);
-        });
-
-    uiHolder.append("button")
-        .text("down")
-        .on("click", () => {
-            currentClusterNum = currentClusterNum === 1 ? 
-            1 : currentClusterNum - 1;
-            updateClusterStyle();
-            numClustersLabel.text(currentClusterNum)
-        })
-
-    const numClustersLabel = uiHolder.append("span")
-        .text(currentClusterNum)
-
-    uiHolder.append("button")
-        .text("up")
-        .on("click", () => {
-            currentClusterNum = currentClusterNum === adjacency.length ? 
-            adjacency.length : currentClusterNum + 1;
-            updateClusterStyle();
-            numClustersLabel.text(currentClusterNum)
-        })
-
-    uiHolder.append("button")
-        .text("reset")
-        .on("click", () => {
-            nodes.length = 0
-            links.length = 0
-            adjacency.length = 0
-            currentClusterNum = 2
-            updateClusterStyle()
-            numClustersLabel.text(currentClusterNum)
-            spawn({x: 0, y: 0});
-        })
-    
-    uiHolder.append("button")
-        .text("refit")
-        .on("click", updateClusterStyle)
-
-
-    uiHolder.append("button")
-        .text("true communities (remove)")
-        .on("click", () => {
-
-            node.transition().duration(500)
-                .attr("fill", (_, i) => {
-                    return i >= trueCommunities.length ? "black" :
-                    clusterColors[trueCommunities[i]];
-                })
-                .attr("opacity", (_, i) => {
-                    return i >= trueCommunities.length ? "0.2" :
-                    "1";
-                })
-        });
-    // Begin graph clustering details
-    function spawn(source) {
-        nodes.push(source);
-
-        // Increase dimension of adjacency matrix and degree vector
-        adjacency.push(new Array(adjacency.length).fill(0));
-        for (const row of adjacency) {
-            row.push(0);
-        }
-
-        for (const target of nodes) {
+        for (const target of this.nodes) {
             if (inrange(source, target) && (source !== target)) {
-                links.push({ source, target });
-                adjacency[adjacency.length - 1][target.index] = 1
-                adjacency[target.index][adjacency.length - 1] = 1
+                this.links.push({ source, target });
+                this.adjacency.set([this.nodes.length - 1, target.index], 1)
+                this.adjacency.set([target.index, this.nodes.length - 1], 1)
             }
         }
 
-        updateClusterStyle();
-        simulation.nodes(nodes);
-        simulation.force("link").links(links);
-        simulation.alpha(1).restart();
+        this.refitGraph();
+        this.rerenderGraph();
+
+        if (!this.spectralLayout) {
+            this.simulation.nodes(this.nodes);
+            this.simulation.force("link").links(this.links);
+            this.simulation.alpha(1).restart();
+        }
     }
 
-    function updateClusterStyle() {
-        const cluster_style_box = document.getElementById("curr-cluster-style");
-        if (cluster_style_box) {
-            cluster_style_box.innerText = clusterStyles[currentClusterStyleIndex]
+    rerenderGraph() {
+        if (this.spectralLayout) {
+            this.spectralRender();
+        } else {
+            this.forceRender();
         }
-        const clusterAssignments = getClusterAssignments(adjacency,
-            clusterStyles[currentClusterStyleIndex],
-            currentClusterNum);
+    }
 
-        link = link
-            .data(links)
-            .join("line");
-        node = node
-            .data(nodes)
+    spectralRender() {
+        const positions = this.topEigenvectors.map(row => row.slice(0, 2))
+        const xCoords = positions.map(coord => coord[0])
+        const yCoords = positions.map(coord => coord[1])
+
+        const xScale = d3.scaleLinear()
+            .range([-this.width / 2, this.width / 2])
+            .domain([Math.min(...xCoords), Math.max(...xCoords)])
+
+        const yScale = d3.scaleLinear()
+            .range([-this.height / 2, this.height / 2])
+            .domain([Math.min(...yCoords), Math.max(...yCoords)])
+
+        if (this.currentClusterNum === 2) {
+            this.drawCentroids(xScale, yScale);
+        } else {
+            this.removeCentroids();
+        }
+
+        this.nodes.forEach((node, i) => {
+            node.x = xScale(positions[i][0]);
+            node.y = yScale(positions[i][1])
+        })
+
+        this.link = this.link
+            .data(this.links)
+            .join(enter => enter.append("line").call(enter => enter.transition().duration(durationTime)
+                .attr("x1", d => d.source.x)
+                .attr("y1", d => d.source.y)
+                .attr("x2", d => d.target.x)
+                .attr("y2", d => d.target.y)
+            ),
+                update => update.transition().duration(durationTime)
+                    .attr("x1", d => d.source.x)
+                    .attr("y1", d => d.source.y)
+                    .attr("x2", d => d.target.x)
+                    .attr("y2", d => d.target.y),
+                exit => exit.remove())
+            .attr("opacity", 0.1);
+
+        this.node = this.node
+            .data(this.nodes)
             .join(
-                enter => enter.append("circle").attr("r", 0)
-                    .call(enter => enter//.transition().duration(500)
+                enter => enter.append("circle")
+                    .call(enter => enter.transition().duration(durationTime)
                         .attr("r", 5)
-                        .attr("fill", clusterAssignments[nodes.length - 1])
-                    )
-                    .call(dragger),
-                update => update.transition().duration(500)
-                    .attr("fill", (d) => clusterAssignments[d.index]),
+                        .attr("fill", this.clusterAssignments[this.nodes.length - 1])
+                        .attr("cx", d => d.x)
+                        .attr("cy", d => d.y)
+                    ),
+                update => update.transition().duration(durationTime)
+                    .attr("fill", d => this.clusterAssignments[d.index])
+                    .attr("cx", d => d.x)
+                    .attr("cy", d => d.y),
                 exit => exit.remove()
             );
     }
-    updateClusterStyle();
-    // spawn({ x: 0, y: 0 });
+
+    forceRender() {
+        this.removeCentroids();
+
+        this.link = this.link
+            .data(this.links)
+            .join("line")
+            .attr("opacity", 1.0);
+
+        this.node = this.node
+            .data(this.nodes)
+            .join(
+                enter => enter.append("circle")
+                    .call(enter => enter
+                        .attr("r", 5)
+                        .attr("fill", this.clusterAssignments[this.nodes.length - 1])
+                    ),
+                update => update.transition().duration(durationTime)
+                    .attr("fill", d => this.clusterAssignments[d.index]),
+                exit => exit.remove()
+            );
+    }
+
+    drawCentroids(xScale, yScale) {
+        // Render cluster boundaries
+        if (this.kmeans === undefined) {
+            return
+        }
+
+        this.centroidPlot = this.centroidPlot
+            .attr("display", null)
+            .data(this.kmeans.centroids)
+            .join(enter => enter.append("circle")
+                .call(enter => enter
+                    .attr("cx", d => xScale(d[0]))
+                    .attr("cy", d => yScale(d[1]))
+                    .attr("r", 10)
+                    .attr("stroke", "#000")
+                    .attr("stroke-width", 2)
+                    .attr("fill", "#333")
+                    .attr("opacity", "0.2")
+                ),
+                update => update.transition().duration(durationTime)
+                    .attr("cx", d => xScale(d[0]))
+                    .attr("cy", d => yScale(d[1])),
+                exit => exit.remove()
+            )
+
+        const boundary = calculateBoundary(this.kmeans.centroids[0], this.kmeans.centroids[1], this.width, this.height)
+
+        this.boundary.attr("display", null)
+            .transition().duration(durationTime)
+            .attr("x1", xScale(boundary.x1))
+            .attr("x2", xScale(boundary.x2))
+            .attr("y1", yScale(boundary.y1))
+            .attr("y2", yScale(boundary.y2))
+    }
+
+    removeCentroids() {
+        this.centroidPlot.attr("display", "none")
+        this.boundary
+            .attr("display", "none")
+    }
 }
 
 
-addGraphView("#graph-one", 
-    sampleSBM([15, 15, 15, 15], 
-        [[.02,  .044, .002, .009],
-         [.044,   .115, .01, .042],
-         [.002, .01, .02, .045],
-         [.009, .042, .045, .117],
+const view = new GraphView("#graph-one",
+    sampleSBM([20, 20, 20, 20],
+        [[.02, .044, .002, .009],
+        [.044, .115, .01, .042],
+        [.002, .01, .02, .045],
+        [.009, .042, .045, .117],
         ]))
 
-addGraphView("#graph-two", sampleSBM([20, 30], [[.8, .2], [.2, .7]]))
+view.initializeOntoDOM()
 
+const view2 = new GraphView("#graph-two")
+
+view2.initializeOntoDOM()

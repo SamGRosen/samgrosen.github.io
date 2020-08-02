@@ -5,6 +5,37 @@ type: "problemexploration"
 permalink: /writings/two-truths
 ---
 
+<style>
+
+.view-controls {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.view-controls i {
+    margin: auto 0.5em;
+    cursor: pointer;
+}
+
+.view-controls i:hover {
+    text-shadow: rgb(170, 170, 170) 0px 0.2em 0.4em;
+}
+
+.view-controls span {
+    text-transform: capitalize;
+}
+
+#control-tooltip {
+    position: absolute;
+    background: #EEE;
+    padding: .1em .2em;
+    border: 1px solid #AAA;
+    font-size: .7em;
+    font-weight: 300;
+}
+
+</style>
 
 An Introduction to Spectral Clustering
 -----
