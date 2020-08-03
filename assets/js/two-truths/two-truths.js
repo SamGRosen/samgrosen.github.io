@@ -1,7 +1,7 @@
 // Constants
 const mindistance = 40;
 const inrange = ({ x: sx, y: sy }, { x: tx, y: ty }) => Math.hypot(sx - tx, sy - ty) <= mindistance;
-const clusterStyles = ["adjacency", "laplacian", "normLaplacian", "cosineSimilarity"];
+const clusterStyles = ["adjacency", "laplacian", "normLaplacian"];
 const nodeRadius = 5;
 const durationTime = 500;
 
@@ -61,6 +61,9 @@ const adjacencySpectralEmbedding = (adjMatrix, numberOfClusters) => {
         )
     );
 
+    console.log(adjMatrix, eigendecomp);
+
+
     return topEigenvectors._data;
 }
 
@@ -83,13 +86,13 @@ const laplacianSpectralEmbedding = (adjMatrix, numberOfClusters, normalized = tr
             math.range(numComponents, numComponents + numberOfClusters) // Laplacian based methods use first k non-trivial eigenvectors
         ))
 
+    console.log(matrix_to_eigen, eigendecomp);
+
     return topEigenvectors._data;
 }
 
 const getTopEigenvectors = (A, clusterStyle, numberOfClusters) => {
     switch (clusterStyle) {
-        case "cosineSimilarity": // falls through to adjacency case
-            return adjacencySpectralEmbedding(math.multiply(A, math.transpose(A)), numberOfClusters);
         case "adjacency":
             return adjacencySpectralEmbedding(A, numberOfClusters);
         case "laplacian":
@@ -120,6 +123,24 @@ const getClusterAssignments = (A, clusterStyle, numberOfClusters) => {
         topEigenvectors: pertinentEigenVectors
     }
 }
+
+const getStartingInfoFor = (matrix) => {
+    const nodes = matrix.map((_, i) => ({ id: i, index: i }))
+    const links = matrix.flatMap((row, i) =>
+        row.map((element, j) => {
+            if (j >= i || matrix[i][j] == 0) {
+                return;
+            }
+            return {
+                source: i,
+                target: j,
+            }
+        }).filter(d => d)
+    )
+
+    return { nodes, links, adjacency: math.sparse(matrix), trueCommunities: [] };
+}
+
 
 const sampleSBM = (communitySizes, probabilityMatrix) => {
     let id = -1; // Start at -1 to do 0 indexing
@@ -191,14 +212,39 @@ const showTooltipWith = function (element, text) {
     tooltip.text(text);
     const rect = element.getBoundingClientRect();
     tooltip.style("top", `${d3.event.pageY - 2 * rect.height}px`)
-    tooltip.style("left", `${d3.event.pageX - rect.width}px`)
+    tooltip.style("left", `${d3.event.pageX - rect.width / 2}px`)
 }
 
 const hideTooltip = () =>
     tooltip.style("top", "-1000px")
 
+const drag = simulation => {
+    function dragstarted(d) {
+        if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+        d.fx = d.x;
+        d.fy = d.y;
+    }
+
+    function dragged(d) {
+        d.fx = d3.event.x;
+        d.fy = d3.event.y;
+    }
+
+    function dragended(d) {
+        if (!d3.event.active) simulation.alphaTarget(0);
+        d.fx = null;
+        d.fy = null;
+    }
+
+    return d3.drag()
+        .on("start", dragstarted)
+        .on("drag", dragged)
+        .on("end", dragended);
+}
+
+const ALL_CONTROLS = ["embedding", "clusterNum", "reset", "refit", "spectral", "spawn"];
 class GraphView {
-    constructor(intoElement, startingGraph = {}) {
+    constructor(intoElement, startingGraph = {}, controls = ALL_CONTROLS, startingStyle) {
         this.intoElement = intoElement;
         this.width = undefined;
         this.height = undefined;
@@ -210,10 +256,12 @@ class GraphView {
         this.trueCommunities = startingGraph.trueCommunities || [];
 
         // Rendering details
-        this.currentClusterNum = 2
-        this.currentClusterStyleIndex = 0;
+        this.controls = controls;
+        this.currentClusterNum = 2;
+        this.currentClusterStyleIndex = startingStyle !== undefined ? startingStyle : 0;
         this.mouse = null;
         this.spectralLayout = false;
+        this.spawnable = controls.includes("spawn")
     }
 
     onWindowResize() {
@@ -234,27 +282,38 @@ class GraphView {
 
         // Add graph layout ability
         this.simulation = d3.forceSimulation(this.nodes)
-            .force("charge", d3.forceManyBody().strength(-60))
+            .force("charge", d3.forceManyBody().strength(-120))
             .force("link", d3.forceLink(this.links))
             .force("x", d3.forceX())
             .force("y", d3.forceY())
             .on("tick", this.ticked.bind(this)); // ensure `this` is the class inside ticked
 
+        this.dragger = drag(this.simulation)
+            .on("start.mouse", function () {
+                console.log("start")
+                viewInstance.mouseleft(this);
+            })
+            .on("end.mouse", function () {
+                console.log("end")
+                viewInstance.mousemoved(this)
+            })
+        // .on("end.mouse", this.mousemoved.bind(this));
+
         this.svg = d3.select(this.intoElement)
             .append("svg")
             .attr("viewBox",
-                [-this.width / 2 - nodeRadius,
-                -this.height / 2 - nodeRadius,
-                this.width + 2 * nodeRadius,
-                this.height + 2 * nodeRadius])
+                [-this.width / 2,
+                -this.height / 2,
+                this.width,
+                this.height])
             .attr("cursor", "crosshair")
-            .on("mouseleave", this.mouseleft.bind(this))
-            .on("mousemove", function () {
+            .on("mouseleave", this.spawnable ? this.mouseleft.bind(this) : null)
+            .on("mousemove", this.spawnable ? function () {
                 viewInstance.mousemoved(this)
-            })
-            .on("click", function () {
+            } : null)
+            .on("click", this.spawnable ? function () {
                 viewInstance.clicked(this)
-            });
+            } : null);
 
         this.link = this.svg.append("g")
             .attr("stroke", "#999")
@@ -290,79 +349,98 @@ class GraphView {
         if (this.nodes.length === 0 && !empty) { // If no nodes and graph was not indicated to start empty, add a single node
             this.spawn({ x: 0, y: 0 })
         }
+
+        this.onWindowResize();
     }
 
     addControls() {
+        if (this.controls.length == 0) {
+            return;
+
+        }
         this.uiHolder = d3.select(this.intoElement)
             .append("div")
             .attr("class", "view-controls")
 
-        const changeStyleControls = this.uiHolder.append("div")
-            .on("mousemove", function () {
-                showTooltipWith(this, "Type of Spectral Embedding")
-            })
-            .on("mouseleave", hideTooltip);
+        if (this.controls.includes("embedding")) {
+            const changeStyleControls = this.uiHolder.append("div")
+                .on("mousemove", function () {
+                    showTooltipWith(this, "Type of Spectral Embedding")
+                })
+                .on("mouseleave", hideTooltip);
 
-        changeStyleControls.append("i")
-            .attr("class", "fas fa-chevron-circle-left")
-            .on("click", this.prevClusterStyle.bind(this));
+            changeStyleControls.append("i")
+                .attr("class", "fas fa-chevron-circle-left")
+                .on("click", this.prevClusterStyle.bind(this));
 
-        this.clusterStyleLabel = changeStyleControls.append("span")
+            changeStyleControls.append("i")
+                .attr("class", "fas fa-chevron-circle-right")
+                .on("click", this.nextClusterStyle.bind(this));
 
-        changeStyleControls.append("i")
-            .attr("class", "fas fa-chevron-circle-right")
-            .on("click", this.nextClusterStyle.bind(this));
+            this.clusterStyleLabel = changeStyleControls.append("span")
 
-        const changeClusterNumControls = this.uiHolder.append("div")
-            .on("mousemove", function () {
-                showTooltipWith(this, "Number of Clusters to Fit")
-            })
-            .on("mouseleave", hideTooltip);
+        }
 
-        changeClusterNumControls.append("i")
-            .attr("class", "fas fa-arrow-down")
-            .on("click", this.downClusterNum.bind(this));
+        if (this.controls.includes("clusterNum")) {
+            const changeClusterNumControls = this.uiHolder.append("div")
+                .on("mousemove", function () {
+                    showTooltipWith(this, "Number of Clusters to Fit")
+                })
+                .on("mouseleave", hideTooltip);
 
-        this.numClustersLabel = changeClusterNumControls.append("span")
+            changeClusterNumControls.append("i")
+                .attr("class", "fas fa-arrow-down")
+                .on("click", this.downClusterNum.bind(this));
 
-        changeClusterNumControls.append("i")
-            .attr("class", "fas fa-arrow-up")
-            .on("click", this.upClusterNum.bind(this));
+            changeClusterNumControls.append("i")
+                .attr("class", "fas fa-arrow-up")
+                .on("click", this.upClusterNum.bind(this));
 
-        this.uiHolder.append("i")
-            .attr("class", "fas fa-trash")
-            .on("click", this.resetGraph.bind(this))
-            .on("mousemove", function () {
-                showTooltipWith(this, "Reset Graph")
-            })
-            .on("mouseleave", hideTooltip);
+            this.numClustersLabel = changeClusterNumControls.append("span")
 
-        this.uiHolder.append("i")
-            .attr("class", "fas fa-retweet")
-            .on("click", () => { this.refitGraph(true); this.rerenderGraph() })
-            .on("mousemove", function () {
-                showTooltipWith(this, "Fit Clusters")
-            })
-            .on("mouseleave", hideTooltip);
+        }
+
+        if (this.controls.includes("reset")) {
+            this.uiHolder.append("i")
+                .attr("class", "fas fa-trash")
+                .on("click", this.resetGraph.bind(this))
+                .on("mousemove", function () {
+                    showTooltipWith(this, "Reset Graph")
+                })
+                .on("mouseleave", hideTooltip);
+        }
+
+        if (this.controls.includes("refit")) {
+            this.uiHolder.append("i")
+                .attr("class", "fas fa-retweet")
+                .on("click", () => { this.refitGraph(true); this.rerenderGraph() })
+                .on("mousemove", function () {
+                    showTooltipWith(this, "Fit Clusters")
+                })
+                .on("mouseleave", hideTooltip);
+        }
 
         // this.uiHolder.append("button")
         //     .text("true communities (remove)")
         //     .on("click", this.showTrueCommunities.bind(this));
 
-        this.uiHolder.append("i")
-            .attr("class", "fas fa-binoculars")
-            .on("click", this.toggleSpectralLayout.bind(this))
-            .on("mousemove", function () {
-                showTooltipWith(this, "Switch to/from Spectral Layout")
-            })
-            .on("mouseleave", hideTooltip);
+        if (this.controls.includes("spectral")) {
+            this.uiHolder.append("i")
+                .attr("class", "fas fa-binoculars")
+                .on("click", this.toggleSpectralLayout.bind(this))
+                .on("mousemove", function () {
+                    showTooltipWith(this, "Switch to/from Spectral Layout")
+                })
+                .on("mouseleave", hideTooltip);
+
+        }
 
         this.updateLabels();
     }
 
     updateLabels() {
-        this.clusterStyleLabel.text(clusterStyles[this.currentClusterStyleIndex]);
-        this.numClustersLabel.text(`${this.currentClusterNum} Clusters`)
+        if (this.clusterStyleLabel) this.clusterStyleLabel.text(clusterStyles[this.currentClusterStyleIndex]);
+        if (this.numClustersLabel) this.numClustersLabel.text(`${this.currentClusterNum} Clusters`)
     }
 
     upClusterNum() {
@@ -528,11 +606,11 @@ class GraphView {
         const yCoords = positions.map(coord => coord[1])
 
         const xScale = d3.scaleLinear()
-            .range([-this.width / 2, this.width / 2])
+            .range([-this.width / 2 + nodeRadius, this.width / 2 - nodeRadius])
             .domain([Math.min(...xCoords), Math.max(...xCoords)])
 
         const yScale = d3.scaleLinear()
-            .range([-this.height / 2, this.height / 2])
+            .range([-this.height / 2 + nodeRadius, this.height / 2 - nodeRadius])
             .domain([Math.min(...yCoords), Math.max(...yCoords)])
 
         if (this.currentClusterNum === 2) {
@@ -560,14 +638,14 @@ class GraphView {
                     .attr("x2", d => d.target.x)
                     .attr("y2", d => d.target.y),
                 exit => exit.remove())
-            .attr("opacity", 0.1);
+            .attr("opacity", 0.2);
 
         this.node = this.node
             .data(this.nodes)
             .join(
                 enter => enter.append("circle")
                     .call(enter => enter.transition().duration(durationTime)
-                        .attr("r", 5)
+                        .attr("r", nodeRadius)
                         .attr("fill", this.clusterAssignments[this.nodes.length - 1])
                         .attr("cx", d => d.x)
                         .attr("cy", d => d.y)
@@ -593,9 +671,9 @@ class GraphView {
             .join(
                 enter => enter.append("circle")
                     .call(enter => enter
-                        .attr("r", 5)
+                        .attr("r", nodeRadius)
                         .attr("fill", this.clusterAssignments[this.nodes.length - 1])
-                    ),
+                    ).call(drag(this.simulation)),
                 update => update.transition().duration(durationTime)
                     .attr("fill", d => this.clusterAssignments[d.index]),
                 exit => exit.remove()
@@ -644,17 +722,36 @@ class GraphView {
     }
 }
 
+const exampleGraph = () => getStartingInfoFor([
+    [0, 1, 1, 0, 0, 0, 0, 0],
+    [1, 0, 1, 1, 0, 0, 0, 0],
+    [1, 1, 0, 0, 0, 1, 1, 1],
+    [0, 1, 0, 0, 1, 0, 0, 1],
+    [0, 0, 0, 1, 0, 0, 1, 1],
+    [0, 0, 1, 0, 0, 0, 1, 0],
+    [0, 0, 1, 0, 1, 1, 0, 1],
+    [0, 0, 1, 1, 1, 0, 1, 0]])
 
-const view = new GraphView("#graph-one",
-    sampleSBM([20, 20, 20, 20],
-        [[.02, .044, .002, .009],
-        [.044, .115, .01, .042],
-        [.002, .01, .02, .045],
-        [.009, .042, .045, .117],
-        ]))
+const view = new GraphView("#graph-one", exampleGraph(), controls = []);
+// const view = new GraphView("#graph-one",
+//     sampleSBM([10, 20, 15, 25],
+//         [[.02, .044, .002, .009],
+//         [.044, .115, .01, .042],
+//         [.002, .01, .02, .045],
+//         [.009, .042, .045, .117],
+//         ]))
 
 view.initializeOntoDOM()
 
-const view2 = new GraphView("#graph-two")
+const view2 = new GraphView("#graph-two", exampleGraph(), controls = ["spectral"]);
 
 view2.initializeOntoDOM()
+
+const view3 = new GraphView("#graph-three", exampleGraph(), controls = ["spectral"], startingStyle = 1);
+const view4 = new GraphView("#graph-four", exampleGraph(), controls = ["spectral"], startingStyle = 2);
+view3.initializeOntoDOM()
+view4.initializeOntoDOM();
+
+
+const view5 = new GraphView("#graph-five");
+view5.initializeOntoDOM();
