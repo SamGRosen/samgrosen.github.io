@@ -434,7 +434,7 @@ class StartingGraphView {
                 .attr("class", "fas fa-retweet")
                 .on("click", () => { this.refitGraph(true); this.rerenderGraph() })
                 .on("mousemove", function () {
-                    showTooltipWith(this, "Fit Clusters")
+                    showTooltipWith(this, "Refit Clusters")
                 })
                 .on("mouseleave", hideTooltip);
         }
