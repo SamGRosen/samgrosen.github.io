@@ -24,10 +24,6 @@ const completeTool = new StartingGraphView("#complete-tool");
 completeTool.initializeOntoDOM();
 
 // X_1 sample for ASE
-
-// const X1 = () => sampleSBM([60, 60],
-//     [[.3, .04],
-//     [.04, .03]]);
 const X1 = () => sampleSBM([60, 60],
     [[.011, .027],
     [.027, .079]]);

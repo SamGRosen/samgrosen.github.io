@@ -611,6 +611,7 @@ class StartingGraphView {
     mousemoved(on) {
         const [x, y] = d3.mouse(on);
         this.mouse = { x, y };
+        this.ticked() // Refresh node positions to help dragger and mouselink
         this.cursor
             .attr("display", this.mouse ? null : "none")
             .attr("cx", this.mouse && this.mouse.x)
@@ -628,7 +629,6 @@ class StartingGraphView {
     clicked(on) {
         this.mousemoved(on);
         this.spawn({ x: this.mouse.x, y: this.mouse.y, index: this.nodes.length - 1 });
-        this.mousemoved(on);
     }
 
     spawn(source) {
@@ -733,6 +733,14 @@ class StartingGraphView {
             .join("line")
             .attr("opacity", nodeOpacity);
 
+        /*
+            In order to change keep the fill of the active communities showActiveCommunities and forceRender 
+            need to share a transition instance. However, this causes adding nodes in quick succession to cause
+            the shared transition to get interrupted and break the visualization. However, if we are not spawning
+            nodes we are safe to share. If we are (we never do for this article), then a little UI 
+            non-responsiveness is no big deal.
+        */
+        const nodeTransition = this.spawnable ? d3.transition().duration(durationTime) : graphTransition
         this.node = this.node
             .data(this.nodes)
             .join(
@@ -742,7 +750,7 @@ class StartingGraphView {
                         .attr("r", nodeRadius)
                         .attr("opacity", nodeOpacity)
                     ).call(this.dragger),
-                update => update.transition(graphTransition)
+                update => update.transition(nodeTransition)
                     .attr("fill", d => this.nodeColors[d.index]),
                 exit => exit.remove()
             );
