@@ -1,5 +1,5 @@
 ---
-title: "A demonstration of the \"two-truths\" phenomenon"
+title: "A Demonstration of the \"two-truths\" Phenomenon"
 collection: writings
 type: "problemexploration"
 permalink: /writings/two-truths
