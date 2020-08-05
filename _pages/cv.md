@@ -116,10 +116,27 @@ Skills and Interests
 
 <!-- Selected Projects -->
 <!-- ====== -->
+
+Selected Projects
+======
 <hr />
 
-  <ul>{% for post in site.publications %}
-    {% include archive-single-cv.html %}
-  {% endfor %}
+<div class="job_box">
+  <div class="job_title">
+    <div><a href="https://github.com/SamGRosen/diary">Python Package: Diary</a></div>
+  </div>
+  <ul>
+    <li> Created a no-dependency package to make asynchronous logging easy with a highly customizable API. </li>
+    <li> Published on PyPI with complete test code coverage, continuous integration, and extensive documentation. </li>
   </ul>
+</div>
 
+<div class="job_box">
+  <div class="job_title">
+    <div><a href="https://github.com/SamGRosen/Circle-Packing">Research Project: SnakePacking</a></div>
+  </div>
+  <ul>
+    <li> Completed semester long project researching the NP-HARD problem of the most efficient way to pack circles. </li>
+    <li> Formulated an algorithm which packs circles in linear time achieving competitive densities near 70 percent. </li>
+  </ul>
+</div>
