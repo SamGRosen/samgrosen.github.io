@@ -9,26 +9,26 @@ As a form of unsupervised learning, clustering is an inherently ill-defined prob
 
 An introduction to spectral graph clustering
 -----
-A community in a graph is generally a set of nodes with many connections between them, and less connections to nodes not in the set. Spectral graph clustering is a strategy to partition a graph \\(G = (V , E)\\) into communities where \\( V \\) is the set of nodes in the graph and \\( E \\) is the set of edges in the graph. Graphs are discrete structures with an intrinsic connection to matrices. As a consequence, a researcher can avoid using graph traversal algorithms and instead use a corresponding matrix to find communities. The basis of spectral graph clustering (for finding \\( k \\) communities) is mapping each vertex \\( v_i \\) to a vector in some low-dimensional space (usually \\(\mathbb R^k\\)). A cluster is a set of points in space that are very close together or intertwined. Because each vertex has been mapped to a point, we are able to find communities by instead finding clusters in the low-dimensional space by using the one-to-one correspondence between vertices and points.
+A community in a graph is generally a set of nodes with many connections between them, and less connections to nodes not in the set. Spectral graph clustering is a strategy to partition a graph \\(G = (V , E)\\) into communities where \\( V \\) is the set of nodes in the graph and \\( E \\) is the set of edges in the graph. Graphs are discrete structures with an intrinsic connection to matrices. As a consequence, a researcher can avoid using graph traversal algorithms and instead use a corresponding matrix to find communities. The basis of spectral graph clustering (for finding \\( k \\) communities) is mapping each vertex \\( v_i \\) to a vector in some low-dimensional space (usually \\(\mathbb R^k\\)). A cluster is a set of close or intertwined points in space. Because each vertex has been mapped to a point, we are able to find communities by instead finding clusters in a low-dimensional space by using the one-to-one correspondence between vertices and points.
 
-A graph is simple if edges do not have weight or direction. Additionally, edges may not start and end at the same node. On simple graphs, spectral clustering is generally the following steps with some variation in the literature <sup> [[2]](#sources) </sup>:
+A graph is simple if edges do not have weight or direction. Additionally, edges may not start and end at the same node. On simple graphs, spectral clustering is usually the following steps with some variation in the literature <sup> [[2]](#sources) </sup>:
 
 1\. 
 Choose a spectral embedding for \\(G\\). This is the matrix meant to represent \\(G\\). Some commonly used spectral embeddings are:
 
 * Adjacency Spectral Embedding (ASE): \\( A \\) where \\(A_{ij}\\) = 1 if there is an edge from \\( v_i \\) to \\( v_j \\) and 0 otherwise. On simple graphs this produces a symmetric matrix of only \\( 0 \\)'s and \\( 1 \\)'s.
-* Laplacian Spectral Embedding (LSE): \\(L\\) where \\(L = D - A\\) and \\(D = A \cdot \mathbb{1}_n\\). \\( D \\) is the diagonal matrix containing the number of neighbors for each node and \\(\mathbb{1}_n\\) is the vector of all \\( 1 \\)'s with dimension \\(n=\vert V \vert\\).
-* Normalized Laplacian Spectral Embedding (nLSE): \\( L_\text{norm} = D^{-1/2} L D^{-1/2} \\) where \\( D^{-1/2} \\) is the diagonal matrix with entries \\( \left(D^{-1/2}\right)\_{jj} = \frac{1}{\sqrt{D\_{jj}}} \\) if \\( v_i \\) has neighbors, 0 otherwise.
+* Laplacian Spectral Embedding (LSE): \\(L = D - A\\) and \\(D = A \cdot \mathbb{1}_n\\). \\( D \\) is the diagonal matrix containing the number of neighbors for each node and \\(\mathbb{1}_n\\) is the vector of all \\( 1 \\)'s with dimension \\(n=\vert V \vert\\).
+* Normalized Laplacian Spectral Embedding (nLSE): \\( L_\text{norm} = D^{-1/2} L D^{-1/2} \\) where \\( D^{-1/2} \\) is the diagonal matrix with entries \\( \left(D^{-1/2}\right)\_{jj} = \frac{1}{\sqrt{D\_{jj}}} \\) if \\( v_j \\) has neighbors, 0 otherwise.
 
-2\. When trying to find \\( k \\) communities in \\( G \\) find the "best" \\( k \\) eigenvectors in the spectral embedding. The best \\( k \\) eigenvectors of \\( A \\) are tied to the *highest* \\( k \\) eigenvalues in magnitude. For \\( L \\) and \\(L_\text{norm}\\) the best eigenvectors are tied to *smallest* eigenvalues above 0. These matrices have many special properties that make them good candidates as a graph embedding. See [[2]](#sources) for more details. 
+2\. When trying to find \\( k \\) communities in \\( G \\), find the "best" \\( k \\) eigenvectors in the spectral embedding. The best \\( k \\) eigenvectors of \\( A \\) are tied to the *largest* \\( k \\) eigenvalues in magnitude. For \\( L \\) and \\(L_\text{norm}\\) the best eigenvectors are tied to *smallest* eigenvalues above 0. These matrices have many special properties that make them good candidates as a graph embedding. See [[2]](#sources) for more details. 
 
 3\. Let \\(e_1,...,e_k\\) be the top eigenvectors. Associate \\( v_i \\) with the \\(i^{th}\\) row in the following matrix. This collection of points is the low-dimensional embedding of \\( G \\).
 
 $$ \left[\begin{array}{c|c|c} \\ e_1  & ... & e_k  \\ \\ \end{array}\right] \in \mathbb{R}^{n \times k} $$
 
-4\. Perform a clustering algorithm suitable for the low-dimensional space (probably \\(\mathbb R^k\\)). This article is based on a paper by Priebe et al.<sup> [[1]](#sources) </sup> that uses [Gaussian Mixture Models](http://statweb.stanford.edu/~tibs/stat315a/LECTURES/em.pdf) (GMM) with theoretical justification. For our purposes we will use [k-means clustering](https://en.wikipedia.org/wiki/K-means_clustering) for simplicity and numerical stability. Both GMM and k-means are usually randomly initialized; as a consequence these algorithms can be run multiple times to get multiple sets of results.
+4\. Perform a clustering algorithm suitable for the low-dimensional space (probably \\(\mathbb R^k\\)). This article is based on a paper by Priebe et al.<sup> [[1]](#sources) </sup> that uses [Gaussian Mixture Models](http://statweb.stanford.edu/~tibs/stat315a/LECTURES/em.pdf) (GMM) with theoretical justification. For our purposes we will use [k-means clustering](https://en.wikipedia.org/wiki/K-means_clustering) for simplicity and numerical stability. Both GMM and k-means are usually randomly initialized; as a consequence separate runs may be give different results.
 
-5\. Create the sets of communities by mapping the points in each cluster back to its corresponding vertex. We finish with each vertex assigned to a single community.
+5\. Create the communities by mapping the points in each cluster back to its corresponding vertex. We finish with each vertex assigned to a single community.
  
 Consider the following adjacency matrix and the induced graph below:
 
@@ -94,7 +94,7 @@ In the upcoming sections we visualize some of the results from this paper. Below
 
 The Stochastic Block Model
 --------------------------
-The [Stochastic Block Model](https://en.wikipedia.org/wiki/Stochastic_block_model) (SBM) is a [popular](https://scholar.google.com/scholar?rlz=1C5CHFA_enUS874US874&um=1&ie=UTF-8&lr&cites=13665266760427536344) random graph model meant to model a set of communities along with inter and intra-connections. For a set of \\( k \\) communities, we use the definition:
+The [Stochastic Block Model](https://en.wikipedia.org/wiki/Stochastic_block_model) (SBM) is a [popular](https://scholar.google.com/scholar?rlz=1C5CHFA_enUS874US874&um=1&ie=UTF-8&lr&cites=13665266760427536344) random graph model meant for sets of communities along with inter and intra-connections. For a set of \\( k \\) communities, we use the definition:
 
 $$ \operatorname{SBM}(\vec v, \mathbf{P}) \\
  \begin{aligned} \vec{v} \in \mathbb{N}^k :&\ \vec{v}_i \text{ is the size of the } i^{th} \text{ community } \\ 
@@ -104,27 +104,29 @@ Some advantages of the SBM include a simple definition and robust sampling.
 
 Consider the distribution:
 
-$$ X_1 \sim \operatorname{SBM}\left(\begin{bmatrix} 60 \\ 60 \end{bmatrix}, \begin{bmatrix} 0.011 & 0.027 \\ 0.027 & 0.079 \end{bmatrix}\right) $$
+$$ X_1 \sim \operatorname{SBM}\left(\begin{bmatrix} 60 \\ 60 \end{bmatrix}, \begin{bmatrix} 0.15 & 0.04 \\ 0.04 & 0.03 \end{bmatrix}\right) $$
 
-This distribution produces graphs with two equally sized communities. One community is dense with a 30% chance for any edge between two nodes in that community to exist. The second community is sparse with each node likelier to connect to the *other* community than its own. Use the visualization below to see which embedding is able to recover the true communities; click the magnifying glass to see the true communities.
+This distribution produces graphs with two equally sized communities. One community is 5 times as dense as the other. A node in the sparser community is more likely to connect to the *other* community than its own. Use the visualization below to see which embedding is able to recover the true communities; click the magnifying glass to see the true communities.
 <div id="x1-sample" class="graph-holder"></div>
 
 
-If the spectral embedding is used, it becomes clear ASE is able to partition the graph into the two communities easily. However, both laplacian-based embeddings give little ability to separate the red and green points in the low-dimensional space, so they struggle to find the communities. If the results were not replicated, the circle-arrow on the right can be clicked to generate another graph from this distribution. The results visualized in this article hold *generally*, so some graphs from the distribution may be easier than others.
+If the spectral embedding is used, it becomes clear ASE is able to split the graph into the two communities easily. However, both laplacian-based embeddings give little ability to separate the red and green points in the low-dimensional space, so they struggle to find the communities. If these results were not replicated, the circle-arrow on the right can be clicked to generate another graph from this distribution. The results visualized in this article hold *generally*, so some graphs from the distribution may not give clear results.
+
+Consider another SBM:
 
 $$ X_2 \sim \operatorname{SBM}\left(\begin{bmatrix} 60 \\ 60 \end{bmatrix}, \begin{bmatrix} 0.050 & 0.013 \\ 0.013 & 0.051 \end{bmatrix}\right) $$
 
-This distribution has two communities of equal size with each community having a small amount of intra-connections. However, both communities connect sparingly to each other, so there is hope we can recover the true communities.
+This distribution has two communities of equal size with each community having a small amount of within-block connections. However, both communities connect sparingly to each other, so there is hope we can recover the true communities.
 
 <div id="x2-sample" class="graph-holder"></div>
 
-Although ASE performed well for \\( X_1 \\) it performs poorly for \\( X_2 \\). Splitting the ASE plot into red and green points is difficult as there are many red and green points clustered together. Both LSE and nLSE give decent plots that can be split into a set of mostly green points and a set of mostly red points (the LSE plot can sometimes be poorly scaled with many points incredibly close together, nLSE does a good job at correcting this). The split will not be perfect, as perfect recovery of any statistical model is rare, but it is a decent estimate of the models communities, especially considering how sparse the graph is. If we sampled from a distribution with the same probability matrix as \\( X_2 \\) but a much higher vertex count, the split would be more apparent. The k-means clustering may struggle to do the best possible partition between red and green points, but if a good split is available there is hope a different clustering algorithm would perform well. To try again with another graph use the circle-arrow on the right.
+Although ASE performed well for \\( X_1 \\) it performs poorly for \\( X_2 \\). Splitting the ASE plot into red and green points is difficult as there are many red and green points clustered together. Both LSE and nLSE give decent plots that can be split into a set of mostly green points and a set of mostly red points (the LSE plot can sometimes be poorly scaled with many points incredibly close together, nLSE does a good job at correcting this). The split will not be perfect, as perfect recovery of any statistical model is rare, but it is a decent estimate of the models communities, especially considering how sparse the graph is. If we sampled from a distribution with the same probability matrix as \\( X_2 \\) but a much higher vertex count, the split would be more apparent. The k-means clustering may struggle to do the best possible partition between red and green points, but if a good split is available there is hope a different clustering algorithm would perform well. To try again with another graph, use the circle-arrow on the right.
 
-In general, ASE performs well on graphs sampled by \\( X_1 \\) but poorly on graphs sampled from \\( X_2 \\). LSE and nLSE give opposite results showing potential that the embeddings can both give different, yet meaningful, results.
+In general, ASE performs well on graphs sampled from \\( X_1 \\) but poorly on graphs sampled from \\( X_2 \\). LSE and nLSE give opposite results showing potential that the embeddings can both give different, yet meaningful, communities.
 
 The "two-truths" phenomenon
 ---------------------------
-Finally we come to the "two-truths" phenomenon first shown by Priebe et al. <sup> [[1]](#sources) </sup>. The authors were able to demonstrate a graph produced from diffusion MRI data that gave different, but meaningful, results based on whether ASE or nLSE was used (in the paper they refer to nLSE as LSE but this article made a distinction between the two). When using ASE the authors find communities of Gray and White matter. Gray and White matter connections exhibit core-periphery structure i.e. if modeled by an SBM with \\(\mathbf P=\begin{bmatrix} a & b \\\\ b & c \end{bmatrix}\\), \\( a \\) will be significantly higher than both \\( b \\) and \\( c \\) (see \\( X_1 \\)). The \\( X_1 \\) distribution also has this structure. When using nLSE the authors find communities of Left and Right matter. In this case an affinity structure is more appropriate with both \\( a \\) and \\( c \\) being significantly higher than \\( b \\) (see \\( X_2 \\)). To visualize a graph that exhibits this behavior we use the probability matrix in figure 3 of the paper:
+Finally we come to the "two-truths" phenomenon first shown by Priebe et al. <sup> [[1]](#sources) </sup>. The authors were able to demonstrate a graph produced from diffusion MRI data that gave different, but meaningful, results based on whether ASE or nLSE was used (in the paper they refer to nLSE as LSE but this article made a distinction between the two). When using ASE the authors find communities of Gray and White matter. Gray and White matter connections exhibit core-periphery structure i.e. if modeled by an SBM with \\(\mathbf P=\begin{bmatrix} a & b \\\\ b & c \end{bmatrix}\\), \\( a \\) will be significantly higher than both \\( b \\) and \\( c \\) (see \\( X_1 \\)). When using nLSE the authors find communities of Left and Right matter. In this case an affinity structure is more appropriate with both \\( a \\) and \\( c \\) being significantly higher than \\( b \\) (see \\( X_2 \\)). To visualize a graph that exhibits behavior similar to diffusion MRI data, we use the probability matrix from figure 3 of the paper:
 
 $$ X_3 \sim \operatorname{SBM} \left(\begin{bmatrix} 30 \\ 30 \\ 30 \\ 30 \end{bmatrix}, 
 \begin{bmatrix} 
@@ -135,7 +137,7 @@ $$ X_3 \sim \operatorname{SBM} \left(\begin{bmatrix} 30 \\ 30 \\ 30 \\ 30 \end{b
 
 <div id="four-blocks" class="graph-holder"></div>
 
-The spectral layout of this graph is noisier, but it should be apparent ASE does a relatively good job putting the red and brown points in a cluster while placing the green and purple in a different, somewhat overlapping, cluster. This matches the findings above as both the green and purple communities have very little within-block connectivity and relatively stronger connections to the red and brown communities.
+The spectral layout of this graph is noisier, but it should be apparent ASE does a relatively good job putting the red and brown points in a cluster while placing the green and purple in a different, somewhat overlapping, cluster. This matches the findings above as both the green and purple communities have very little within-block connectivity and relatively strong connections to the red and brown communities.
 
 When looking at the nLSE plot, with some noticeable overlap, the green and red points are in a cluster while the purple and brown points are in another. Looking at \\(\mathbf P\\) we can split it us as:
 
@@ -154,7 +156,7 @@ $$ X_4 \sim \operatorname{SBM}\left(\begin{bmatrix} 60 \\ 60 \end{bmatrix}, \lef
     0.013 & 0.051 \end{array}\right]\right)
 $$
 
-\\(X_2 = X_4\\) which we showed earlier was best split with nLSE. Additionally if we were to squash \\(X_4\\) into a two-block SBM via the splits found by doing ASE, we would get the distribution of \\( X_1 \\).
+\\(X_2 = X_4\\) which we showed earlier was best split with nLSE.
 
 Although we have only illustrated the case from Priebe et al. <sup> [[1]](#sources) </sup>, the paper's conclusion is still clear: there are cases where different embeddings of the same graph will give distinct legitimate results, so researchers should not be so quick to discredit the results of an embedding on their data.
 

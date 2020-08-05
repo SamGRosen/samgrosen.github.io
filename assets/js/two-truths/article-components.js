@@ -25,8 +25,8 @@ completeTool.initializeOntoDOM();
 
 // X_1 sample for ASE
 const X1 = () => sampleSBM([60, 60],
-    [[.011, .027],
-    [.027, .079]]);
+    [[.12, .04],
+    [.04, .03]]);
 const x1Sample = new GeneratingGraphView("#x1-sample",
     generator = X1,
     controls = ["spectral", "embedding", "refit", "showTruth", "generate"])
@@ -34,8 +34,8 @@ x1Sample.initializeOntoDOM();
 
 // X_2 sample for LSE
 const X2 = () => sampleSBM([60, 60],
-        [[.050, .013],
-        [.013, .051]])
+    [[.050, .013],
+    [.013, .051]])
 const x2Sample = new GeneratingGraphView("#x2-sample",
     generator = X2,
     controls = ["spectral", "embedding", "refit", "showTruth", "generate"])
