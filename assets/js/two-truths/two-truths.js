@@ -94,7 +94,7 @@ const laplacianSpectralEmbedding = (adjMatrix, numberOfClusters, normalized = tr
     let matrix_to_eigen = laplacianMatrix;
     if (normalized) {
         const invsqrtDegree_matrix = math.diag(
-            degree_vector.valueOf().map(d => d[0] !== 0 ? 1 / math.sqrt(d[0]) : 0))
+            degree_vector.valueOf().map(d => d[0] !== 0 ? 1 / math.sqrt(d[0]) : 0), "sparse")
         matrix_to_eigen = math.multiply(math.multiply(invsqrtDegree_matrix, laplacianMatrix), invsqrtDegree_matrix)
     }
     const eigendecomp = math.eigs(matrix_to_eigen)
