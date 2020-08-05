@@ -14,13 +14,13 @@ A community in a graph is generally a set of nodes with many connections between
 A graph is simple if edges do not have weight or direction. Additionally, edges may not start and end at the same node. On simple graphs, spectral clustering is usually the following steps with some variation in the literature <sup> [[2]](#sources) </sup>:
 
 1\. 
-Choose a spectral embedding for \\(G\\). This is the matrix meant to represent \\(G\\). Some commonly used spectral embeddings are:
+Choose a spectral embedding for \\(G\\). This is derived from the matrix meant to represent \\(G\\). Some commonly used matrices are:
 
-* Adjacency Spectral Embedding (ASE): \\( A \\) where \\(A_{ij}\\) = 1 if there is an edge from \\( v_i \\) to \\( v_j \\) and 0 otherwise. On simple graphs this produces a symmetric matrix of only \\( 0 \\)'s and \\( 1 \\)'s.
-* Laplacian Spectral Embedding (LSE): \\(L = D - A\\) and \\(D = A \cdot \mathbb{1}_n\\). \\( D \\) is the diagonal matrix containing the number of neighbors for each node and \\(\mathbb{1}_n\\) is the vector of all \\( 1 \\)'s with dimension \\(n=\vert V \vert\\).
-* Normalized Laplacian Spectral Embedding (nLSE): \\( L_\text{norm} = D^{-1/2} L D^{-1/2} \\) where \\( D^{-1/2} \\) is the diagonal matrix with entries \\( \left(D^{-1/2}\right)\_{jj} = \frac{1}{\sqrt{D\_{jj}}} \\) if \\( v_j \\) has neighbors, 0 otherwise.
+* Adjacency: \\( A \\) where \\(A_{ij}\\) = 1 if there is an edge from \\( v_i \\) to \\( v_j \\) and 0 otherwise. On simple graphs this produces a symmetric matrix of only \\( 0 \\)'s and \\( 1 \\)'s. The eigendecomposition of \\(A\\) is used to calculate the adjacency spectral embedding (ASE).
+* Laplacian: \\(L = D - A\\) and \\(D = A \cdot \mathbb{1}_n\\). \\( D \\) is the diagonal matrix containing the number of neighbors for each node and \\(\mathbb{1}_n\\) is the vector of all \\( 1 \\)'s with dimension \\(n=\vert V \vert\\). Similar to above, the eigendecomposition of \\(L\\) calculates the laplacian spectral embedding (LSE).
+* Normalized Laplacian: \\( L_\text{norm} = D^{-1/2} L D^{-1/2} \\) where \\( D^{-1/2} \\) is the diagonal matrix with entries \\( \left(D^{-1/2}\right)\_{jj} = \frac{1}{\sqrt{D\_{jj}}} \\) if \\( v_j \\) has neighbors, 0 otherwise. The resulting eigendecomposition calculates the normalized laplacian spectral embedding (nLSE).
 
-2\. When trying to find \\( k \\) communities in \\( G \\), find the "best" \\( k \\) eigenvectors in the spectral embedding. The best \\( k \\) eigenvectors of \\( A \\) are tied to the *largest* \\( k \\) eigenvalues in magnitude. For \\( L \\) and \\(L_\text{norm}\\) the best eigenvectors are tied to *smallest* eigenvalues above 0. These matrices have many special properties that make them good candidates as a graph embedding. See [[2]](#sources) for more details. 
+2\. When trying to find \\( k \\) communities in \\( G \\), find the "best" \\( k \\) eigenvectors in the spectral embedding. The best \\( k \\) eigenvectors of \\( A \\) are tied to the *largest* \\( k \\) eigenvalues in magnitude. For \\( L \\) and \\(L_\text{norm}\\) the best eigenvectors are tied to *smallest* eigenvalues above 0. These matrices have many special properties that make them good candidates for calculating an embedding. See [[2]](#sources) for more details. 
 
 3\. Let \\(e_1,...,e_k\\) be the top eigenvectors. Associate \\( v_i \\) with the \\(i^{th}\\) row in the following matrix. This collection of points is the low-dimensional embedding of \\( G \\).
 
