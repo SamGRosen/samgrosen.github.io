@@ -1,17 +1,40 @@
 // Constants
 const mindistance = 40;
-const inrange = ({ x: sx, y: sy }, { x: tx, y: ty }) => Math.hypot(sx - tx, sy - ty) <= mindistance;
+const STANDARD_CONTROLS = ["embedding", "clusterNum", "reset", "refit", "spectral", "spawn"];
+const EXTRA_CONTROLS = ["showTrue", "generate"];
 const clusterStyles = ["adjacency", "laplacian", "normLaplacian"];
+
 const nodeRadius = 5;
+const nodeOpacity = 0.85;
 const durationTime = 500;
+const graphTransition = d3.transition().duration(durationTime);
 
 const clusterColors = d3.schemeTableau10.slice();
 clusterColors.push(...d3.schemeSet2);
 clusterColors.push(...d3.schemeSet3);
 
+const trueClusterColors = d3.schemeCategory10.slice(2);
+
 const tooltip = d3.select("body")
     .append("div")
     .attr("id", "control-tooltip")
+
+// https://stackoverflow.com/a/13627586/
+const ordinalSuffixOf = (i) => {
+    var j = i % 10,
+        k = i % 100;
+    if (j == 1 && k != 11) {
+        return i + "st";
+    }
+    if (j == 2 && k != 12) {
+        return i + "nd";
+    }
+    if (j == 3 && k != 13) {
+        return i + "rd";
+    }
+    return i + "th";
+}
+const inrange = ({ x: sx, y: sy }, { x: tx, y: ty }) => Math.hypot(sx - tx, sy - ty) <= mindistance;
 
 const getAvailableColors = (numberOfClusters) => {
     // By pushing to clusterColors we ensure consistent cluster colors across views
@@ -61,9 +84,6 @@ const adjacencySpectralEmbedding = (adjMatrix, numberOfClusters) => {
         )
     );
 
-    console.log(adjMatrix, eigendecomp);
-
-
     return topEigenvectors._data;
 }
 
@@ -79,14 +99,11 @@ const laplacianSpectralEmbedding = (adjMatrix, numberOfClusters, normalized = tr
     }
     const eigendecomp = math.eigs(matrix_to_eigen)
     const numComponents = eigendecomp.values.toArray().filter(e => e < 1e-10).length
-    const topScaledEigenValues = eigendecomp.values.toArray().slice(numComponents, numComponents + numberOfClusters).map(e => math.sqrt(math.abs(e)))
     const topEigenvectors = math.subset(eigendecomp.vectors,
         math.index(
             math.range(0, adjMatrix.size()[0]),
             math.range(numComponents, numComponents + numberOfClusters) // Laplacian based methods use first k non-trivial eigenvectors
         ))
-
-    console.log(matrix_to_eigen, eigendecomp);
 
     return topEigenvectors._data;
 }
@@ -105,12 +122,11 @@ const getTopEigenvectors = (A, clusterStyle, numberOfClusters) => {
 }
 
 const getClusterAssignments = (A, clusterStyle, numberOfClusters) => {
-    const availableColors = getAvailableColors(numberOfClusters)
     const actualClusters = Math.min(A.size()[0], numberOfClusters);
 
     if (A.size()[0] <= 2) { // Will always partition each of two nodes into its own community
         return {
-            clusterAssignments: availableColors.slice(0, 2),
+            clusterAssignments: clusterColors.slice(0, 2),
             topEigenvectors: [[1, 0], [0, 1]]
         }
     }
@@ -119,7 +135,7 @@ const getClusterAssignments = (A, clusterStyle, numberOfClusters) => {
     const kmeans = new skmeans(pertinentEigenVectors, actualClusters);
     return {
         kmeans,
-        clusterAssignments: getConsistentClusters(kmeans.idxs).map(cluster => availableColors[cluster]),
+        clusterAssignments: getConsistentClusters(kmeans.idxs),
         topEigenvectors: pertinentEigenVectors
     }
 }
@@ -140,7 +156,6 @@ const getStartingInfoFor = (matrix) => {
 
     return { nodes, links, adjacency: math.sparse(matrix), trueCommunities: [] };
 }
-
 
 const sampleSBM = (communitySizes, probabilityMatrix) => {
     let id = -1; // Start at -1 to do 0 indexing
@@ -186,16 +201,16 @@ const calculateBoundary = (point1, point2) => {
     const perpendicularSlope = -1 / slope
     const midpoint = [(point1[0] + point2[0]) / 2, (point1[1] + point2[1]) / 2];
     let x1, x2, y1, y2;
-    if (Math.abs(slope) < 1e-10) { // Vertical boundary
-        x1 = -1
-        y1 = midpoint[1];
-        x2 = 1
-        y2 = midpoint[1];
-    } else if (slope === Infinity) { // Horizontal boundary
+    if (Math.abs(point2[1] - point1[1]) < 1e-15) { // Vertical boundary
         x1 = midpoint[0];
-        y1 = -1
+        y1 = -1;
         x2 = midpoint[0];
-        y2 = 1
+        y2 = 1;
+    } else if (Math.abs(slope) === Infinity) { // Horizontal boundary
+        x1 = -1;
+        y1 = midpoint[1];
+        x2 = 1;
+        y2 = midpoint[1];
     } else {
         x1 = (-1 + perpendicularSlope * midpoint[0] - midpoint[1]) / perpendicularSlope
         y1 = -1;
@@ -220,6 +235,7 @@ const hideTooltip = () =>
 
 const drag = simulation => {
     function dragstarted(d) {
+        if (simulation.alpha() === -1) return;
         if (!d3.event.active) simulation.alphaTarget(0.3).restart();
         d.fx = d.x;
         d.fy = d.y;
@@ -242,9 +258,8 @@ const drag = simulation => {
         .on("end", dragended);
 }
 
-const ALL_CONTROLS = ["embedding", "clusterNum", "reset", "refit", "spectral", "spawn"];
-class GraphView {
-    constructor(intoElement, startingGraph = {}, controls = ALL_CONTROLS, startingStyle) {
+class StartingGraphView {
+    constructor(intoElement, startingGraph = {}, controls = STANDARD_CONTROLS, startingStyle = 0) {
         this.intoElement = intoElement;
         this.width = undefined;
         this.height = undefined;
@@ -289,15 +304,7 @@ class GraphView {
             .on("tick", this.ticked.bind(this)); // ensure `this` is the class inside ticked
 
         this.dragger = drag(this.simulation)
-            .on("start.mouse", function () {
-                console.log("start")
-                viewInstance.mouseleft(this);
-            })
-            .on("end.mouse", function () {
-                console.log("end")
-                viewInstance.mousemoved(this)
-            })
-        // .on("end.mouse", this.mousemoved.bind(this));
+
 
         this.svg = d3.select(this.intoElement)
             .append("svg")
@@ -307,13 +314,37 @@ class GraphView {
                 this.width,
                 this.height])
             .attr("cursor", "crosshair")
-            .on("mouseleave", this.spawnable ? this.mouseleft.bind(this) : null)
-            .on("mousemove", this.spawnable ? function () {
-                viewInstance.mousemoved(this)
-            } : null)
-            .on("click", this.spawnable ? function () {
-                viewInstance.clicked(this)
-            } : null);
+
+        if (this.spawnable) {
+            this.dragger
+                .on("start.mouse", function () {
+                    viewInstance.mouseleft(this);
+                })
+                .on("end.mouse", function () {
+                    viewInstance.mousemoved(this)
+                })
+
+            this.svg
+                .on("mouseleave", this.mouseleft.bind(this))
+                .on("mousemove", function () {
+                    viewInstance.mousemoved(this)
+                })
+                .on("click", function () {
+                    viewInstance.clicked(this)
+                });
+
+            // Add mouse interactivity
+            this.mouselink = this.svg.append("g")
+                .attr("stroke", "red")
+                .selectAll("line");
+
+            this.cursor = this.svg.append("circle")
+                .attr("display", "none")
+                .attr("fill", "none")
+                .attr("stroke", "red")
+                .attr("r", mindistance - 5);
+        }
+
 
         this.link = this.svg.append("g")
             .attr("stroke", "#999")
@@ -321,17 +352,6 @@ class GraphView {
 
         this.node = this.svg.append("g")
             .selectAll("circle");
-
-        // Add mouse interactivity
-        this.mouselink = this.svg.append("g")
-            .attr("stroke", "red")
-            .selectAll("line");
-
-        this.cursor = this.svg.append("circle")
-            .attr("display", "none")
-            .attr("fill", "none")
-            .attr("stroke", "red")
-            .attr("r", mindistance - 5);
 
         // Add spectral layout clustering info
         this.centroidPlot = this.svg.append("g")
@@ -356,8 +376,8 @@ class GraphView {
     addControls() {
         if (this.controls.length == 0) {
             return;
-
         }
+
         this.uiHolder = d3.select(this.intoElement)
             .append("div")
             .attr("class", "view-controls")
@@ -378,7 +398,6 @@ class GraphView {
                 .on("click", this.nextClusterStyle.bind(this));
 
             this.clusterStyleLabel = changeStyleControls.append("span")
-
         }
 
         if (this.controls.includes("clusterNum")) {
@@ -420,9 +439,29 @@ class GraphView {
                 .on("mouseleave", hideTooltip);
         }
 
-        // this.uiHolder.append("button")
-        //     .text("true communities (remove)")
-        //     .on("click", this.showTrueCommunities.bind(this));
+        if (this.controls.includes("showTruth")) {
+            this.uiHolder.append("i")
+                .attr("class", "fas fa-search")
+                .on("click", this.showTrueCommunities.bind(this))
+                .on("mousemove", function () {
+                    showTooltipWith(this, "Show given communities")
+                })
+                .on("mouseleave", hideTooltip);
+
+            const colorBar = this.uiHolder.append("div").attr("class", "color-bar");
+            const numTrue = new Set(this.trueCommunities).size;
+            this.activeCommunities = new Array(numTrue).fill(false);
+            for (let i = 0; i < numTrue; i++) {
+                colorBar.append("div")
+                    .style("background", trueClusterColors[i])
+                    .style("opacity", 0.2)
+                    .on("click", () => this.toggleCommunity(i))
+                    .on("mousemove", function () {
+                        showTooltipWith(this, `Show ${ordinalSuffixOf(i + 1)} community`)
+                    })
+                    .on("mouseleave", hideTooltip);
+            }
+        }
 
         if (this.controls.includes("spectral")) {
             this.uiHolder.append("i")
@@ -432,12 +471,14 @@ class GraphView {
                     showTooltipWith(this, "Switch to/from Spectral Layout")
                 })
                 .on("mouseleave", hideTooltip);
-
         }
 
         this.updateLabels();
     }
 
+    generateNew() {
+
+    }
     updateLabels() {
         if (this.clusterStyleLabel) this.clusterStyleLabel.text(clusterStyles[this.currentClusterStyleIndex]);
         if (this.numClustersLabel) this.numClustersLabel.text(`${this.currentClusterNum} Clusters`)
@@ -488,10 +529,10 @@ class GraphView {
     }
 
     refitGraph(useCache = false) { // TODO Add more cacheing here
+        const availableColors = getAvailableColors(this.numberOfClusters)
         if (this.topEigenvectors && useCache) {
-            const availableColors = getAvailableColors()
             this.kmeans = new skmeans(this.topEigenvectors, this.currentClusterNum);
-            this.clusterAssignments = getConsistentClusters(this.kmeans.idxs).map(cluster => availableColors[cluster]);
+            this.clusterAssignments = getConsistentClusters(this.kmeans.idxs);
         } else {
             const clusteringInfo = getClusterAssignments(this.adjacency,
                 clusterStyles[this.currentClusterStyleIndex],
@@ -500,18 +541,36 @@ class GraphView {
             this.kmeans = clusteringInfo.kmeans
             this.topEigenvectors = clusteringInfo.topEigenvectors;
         }
+        this.nodeColors = this.clusterAssignments.map(cluster => availableColors[cluster]);
     }
 
-    showTrueCommunities() { // needs to be toggable
-        this.node.transition().duration(durationTime)
-            .attr("fill", (_, i) => {
-                return i >= this.trueCommunities.length ? "black" :
-                    clusterColors[this.trueCommunities[i]];
-            })
-            .attr("opacity", (_, i) => {
-                return i >= this.trueCommunities.length ? "0.2" :
-                    "1";
-            })
+    showTrueCommunities() {
+        this.activeCommunities.fill(!this.activeCommunities.includes(true))
+
+        this.showActiveCommunities();
+    }
+
+    toggleCommunity(community) {
+        this.activeCommunities[community] = !this.activeCommunities[community]
+        this.showActiveCommunities();
+    }
+
+    showActiveCommunities() {
+        const isActive = i => this.activeCommunities[this.trueCommunities[i]];
+        const noneActive = !(this.activeCommunities.includes(true)); // isActive not always false
+        this.node.transition(graphTransition)
+            .attr("fill", (_, i) =>
+                isActive(i) ? trueClusterColors[this.trueCommunities[i]] : this.nodeColors[i])
+            .attr("opacity", (_, i) => isActive(i) || noneActive ? nodeOpacity : 0.2);
+
+        d3.selectAll(`${this.intoElement} .color-bar > div`)
+            .transition(graphTransition)
+            .style("opacity", (_, i) =>
+                this.activeCommunities[i] ? "1" : "0.5"
+            )
+
+        d3.select(`${this.intoElement} .fa-search`)
+            .classed("active-control", !noneActive)
     }
 
     toggleSpectralLayout() {
@@ -522,17 +581,19 @@ class GraphView {
             this.simulation.alpha(1).restart();
         } else {
             this.simulation.stop()
+            this.simulation.alpha(-1); // Gives dragger ability to be disabled
             this.spectralLayout = true;
         }
 
         this.rerenderGraph();
 
         d3.select(`${this.intoElement} .fa-binoculars`)
-            .style("color", this.spectralLayout ? "#4682b4" : null)
+            .classed("active-control", this.spectralLayout)
     }
 
     ticked() {
-        this.node.attr("cx", d => d.x)
+        this.node
+            .attr("cx", d => d.x)
             .attr("cy", d => d.y)
 
         this.link.attr("x1", d => d.source.x)
@@ -585,9 +646,10 @@ class GraphView {
         this.refitGraph();
         this.rerenderGraph();
 
+        this.simulation.nodes(this.nodes);
+        this.simulation.force("link").links(this.links);
+
         if (!this.spectralLayout) {
-            this.simulation.nodes(this.nodes);
-            this.simulation.force("link").links(this.links);
             this.simulation.alpha(1).restart();
         }
     }
@@ -597,6 +659,10 @@ class GraphView {
             this.spectralRender();
         } else {
             this.forceRender();
+        }
+
+        if (this.activeCommunities !== undefined) {
+            this.showActiveCommunities()
         }
     }
 
@@ -613,7 +679,7 @@ class GraphView {
             .range([-this.height / 2 + nodeRadius, this.height / 2 - nodeRadius])
             .domain([Math.min(...yCoords), Math.max(...yCoords)])
 
-        if (this.currentClusterNum === 2) {
+        if (this.currentClusterNum === 2 && this.nodes.length > 2) {
             this.drawCentroids(xScale, yScale);
         } else {
             this.removeCentroids();
@@ -624,19 +690,23 @@ class GraphView {
             node.y = yScale(positions[i][1])
         })
 
-        this.link = this.link
-            .data(this.links)
-            .join(enter => enter.append("line").call(enter => enter.transition().duration(durationTime)
+        const changeLinkPosition = caller =>
+            caller.transition(graphTransition)
                 .attr("x1", d => d.source.x)
                 .attr("y1", d => d.source.y)
                 .attr("x2", d => d.target.x)
                 .attr("y2", d => d.target.y)
-            ),
-                update => update.transition().duration(durationTime)
-                    .attr("x1", d => d.source.x)
-                    .attr("y1", d => d.source.y)
-                    .attr("x2", d => d.target.x)
-                    .attr("y2", d => d.target.y),
+
+        const changeNodePosition = caller =>
+            caller.transition(graphTransition)
+                .attr("cx", d => d.x)
+                .attr("cy", d => d.y);
+
+        this.link = this.link
+            .data(this.links)
+            .join(enter => enter.append("line")
+                .call(changeLinkPosition),
+                changeLinkPosition,
                 exit => exit.remove())
             .attr("opacity", 0.2);
 
@@ -644,16 +714,13 @@ class GraphView {
             .data(this.nodes)
             .join(
                 enter => enter.append("circle")
-                    .call(enter => enter.transition().duration(durationTime)
+                    .call(enter => changeNodePosition(enter)
+                        .attr("fill", this.nodeColors[this.nodes.length - 1])
                         .attr("r", nodeRadius)
-                        .attr("fill", this.clusterAssignments[this.nodes.length - 1])
-                        .attr("cx", d => d.x)
-                        .attr("cy", d => d.y)
+                        .attr("opacity", nodeOpacity)
                     ),
-                update => update.transition().duration(durationTime)
-                    .attr("fill", d => this.clusterAssignments[d.index])
-                    .attr("cx", d => d.x)
-                    .attr("cy", d => d.y),
+                update => changeNodePosition(update)
+                    .attr("fill", d => this.nodeColors[d.index]),
                 exit => exit.remove()
             );
     }
@@ -664,51 +731,50 @@ class GraphView {
         this.link = this.link
             .data(this.links)
             .join("line")
-            .attr("opacity", 1.0);
+            .attr("opacity", nodeOpacity);
 
         this.node = this.node
             .data(this.nodes)
             .join(
                 enter => enter.append("circle")
                     .call(enter => enter
+                        .attr("fill", this.nodeColors[this.nodes.length - 1])
                         .attr("r", nodeRadius)
-                        .attr("fill", this.clusterAssignments[this.nodes.length - 1])
-                    ).call(drag(this.simulation)),
-                update => update.transition().duration(durationTime)
-                    .attr("fill", d => this.clusterAssignments[d.index]),
+                        .attr("opacity", nodeOpacity)
+                    ).call(this.dragger),
+                update => update.transition(graphTransition)
+                    .attr("fill", d => this.nodeColors[d.index]),
                 exit => exit.remove()
             );
     }
 
     drawCentroids(xScale, yScale) {
         // Render cluster boundaries
-        if (this.kmeans === undefined) {
-            return
-        }
+        const updateCentroids = caller =>
+            caller.transition(graphTransition)
+                .attr("cx", d => xScale(d[0]))
+                .attr("cy", d => yScale(d[1]))
+                .attr("r", 10)
+                .attr("stroke", "#000")
+                .attr("stroke-width", 2)
+                .attr("fill", "#333")
+                .attr("opacity", "0.2")
 
         this.centroidPlot = this.centroidPlot
             .attr("display", null)
             .data(this.kmeans.centroids)
             .join(enter => enter.append("circle")
-                .call(enter => enter
-                    .attr("cx", d => xScale(d[0]))
-                    .attr("cy", d => yScale(d[1]))
-                    .attr("r", 10)
-                    .attr("stroke", "#000")
-                    .attr("stroke-width", 2)
-                    .attr("fill", "#333")
-                    .attr("opacity", "0.2")
-                ),
-                update => update.transition().duration(durationTime)
-                    .attr("cx", d => xScale(d[0]))
-                    .attr("cy", d => yScale(d[1])),
+                .call(updateCentroids),
+                updateCentroids,
                 exit => exit.remove()
             )
 
         const boundary = calculateBoundary(this.kmeans.centroids[0], this.kmeans.centroids[1], this.width, this.height)
 
         this.boundary.attr("display", null)
-            .transition().duration(durationTime)
+            .transition(graphTransition)
+            .attr("stroke-width", 3.5)
+            .attr("opacity", "0.4")
             .attr("x1", xScale(boundary.x1))
             .attr("x2", xScale(boundary.x2))
             .attr("y1", yScale(boundary.y1))
@@ -717,41 +783,51 @@ class GraphView {
 
     removeCentroids() {
         this.centroidPlot.attr("display", "none")
-        this.boundary
-            .attr("display", "none")
+        this.boundary.attr("display", "none")
     }
 }
 
-const exampleGraph = () => getStartingInfoFor([
-    [0, 1, 1, 0, 0, 0, 0, 0],
-    [1, 0, 1, 1, 0, 0, 0, 0],
-    [1, 1, 0, 0, 0, 1, 1, 1],
-    [0, 1, 0, 0, 1, 0, 0, 1],
-    [0, 0, 0, 1, 0, 0, 1, 1],
-    [0, 0, 1, 0, 0, 0, 1, 0],
-    [0, 0, 1, 0, 1, 1, 0, 1],
-    [0, 0, 1, 1, 1, 0, 1, 0]])
+class GeneratingGraphView extends StartingGraphView {
+    constructor(intoElement, generator, controls = STANDARD_CONTROLS) {
+        super(intoElement, {}, controls)
 
-const view = new GraphView("#graph-one", exampleGraph(), controls = []);
-// const view = new GraphView("#graph-one",
-//     sampleSBM([10, 20, 15, 25],
-//         [[.02, .044, .002, .009],
-//         [.044, .115, .01, .042],
-//         [.002, .01, .02, .045],
-//         [.009, .042, .045, .117],
-//         ]))
+        this.generator = generator;
+    }
 
-view.initializeOntoDOM()
+    initializeOntoDOM() {
+        this.generateNew(false)
 
-const view2 = new GraphView("#graph-two", exampleGraph(), controls = ["spectral"]);
+        super.initializeOntoDOM()
+    }
 
-view2.initializeOntoDOM()
+    addControls() {
+        super.addControls();
+        if (this.controls.includes("generate")) {
+            this.uiHolder.append("i")
+                .attr("class", "fas fa-undo")
+                .on("click", this.generateNew.bind(this))
+                .on("mousemove", function () {
+                    showTooltipWith(this, "Generate Graph")
+                })
+                .on("mouseleave", hideTooltip);
+        }
+    }
 
-const view3 = new GraphView("#graph-three", exampleGraph(), controls = ["spectral"], startingStyle = 1);
-const view4 = new GraphView("#graph-four", exampleGraph(), controls = ["spectral"], startingStyle = 2);
-view3.initializeOntoDOM()
-view4.initializeOntoDOM();
+    generateNew(rerender = true) {
+        const startingGraph = this.generator();
+        this.nodes = startingGraph.nodes || [];
+        this.links = startingGraph.links || [];
+        this.adjacency = startingGraph.adjacency || math.sparse();
+        this.trueCommunities = startingGraph.trueCommunities || [];
+        if (rerender) {
+            this.simulation.nodes(this.nodes);
+            this.simulation.force("link").links(this.links);
+            this.refitGraph()
+            this.rerenderGraph()
 
-
-const view5 = new GraphView("#graph-five");
-view5.initializeOntoDOM();
+            if (!this.spectralLayout) {
+                this.simulation.alpha(1).restart();
+            }
+        }
+    }
+}
