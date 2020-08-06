@@ -9,9 +9,8 @@ const showEmail = () => {
         rot13email.style.display = "";
         rot13email.style.opacity = 1;
         rot13email.innerText = str_rot13(rot13email.innerText)
-        emailSpan.removeEventListener("mouseenter", showEmail)
-
     }, 300)
+    emailSpan.removeEventListener("mouseenter", showEmail)
 }
 emailSpan.addEventListener("mouseenter", showEmail);
 
