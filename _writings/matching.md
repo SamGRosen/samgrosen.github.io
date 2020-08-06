@@ -34,7 +34,7 @@ Playing with perfect memory
 Let's examine how well a player with perfect memory would perform. Whenever this player views a card, they never forget it; they play as if any viewed cards become permanently face-up. On any one turn the player would do the following (choosing each unviewed card with equal chance):
 
 1. If there are two cards with the same color that have been viewed, choose the pair and remove the cards from the table. Otherwise, pick a first card to view: A player with perfect memory should always choose a card that they have yet to view, since viewing a previously seen card gives no extra information or advantage.
-2. Pick a second card to view:
+2. Pick a second card to view.
 3. If the first card chosen has a matching card that the player has seen before, then the matching card should be chosen for the second part of the turn. Two cards are then removed from the table.
 4. If the player has not previously seen the color of the first card they should choose another unseen card to view:
     * If the second card viewed contains an unseen color, then the turn is over and the player has added 2 cards to their memory.
