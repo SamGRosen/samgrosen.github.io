@@ -25,7 +25,7 @@ completeTool.initializeOntoDOM();
 
 // X_1 sample for ASE
 const X1 = () => sampleSBM([60, 60],
-    [[.12, .04],
+    [[.15, .04],
     [.04, .03]]);
 const x1Sample = new GeneratingGraphView("#x1-sample",
     generator = X1,
