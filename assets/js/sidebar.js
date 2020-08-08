@@ -11,8 +11,10 @@ const showEmail = () => {
         rot13email.innerText = str_rot13(rot13email.innerText)
     }, 300)
     emailSpan.removeEventListener("mouseenter", showEmail)
+    emailSpan.removeEventListener("click", showEmail)
 }
 emailSpan.addEventListener("mouseenter", showEmail);
+emailSpan.addEventListener("click", showEmail);
 
 // https://codereview.stackexchange.com/a/192241
 function str_rot13(str){
