@@ -39,11 +39,12 @@ Work experience
   <div class="job_box">
     <div class="job_title">
       <div>Datadog</div>
-      <div>Fall 2020</div>
+      <div>Sept. - Dec. 2020</div>
     </div>
-    <p>Software Engineering Intern</p>
+    <p>Software Engineering Intern (Cloud Integrations team)</p>
     <ul>
-      <li> Starting September 2020 </li>
+      <li> Optimized and bolstered Azure crawlers responsible for crawling millions of data points an hour. </li>
+      <li> Debugged and implemented fixes for issues found by customers in production for crawled metrics. </li>
     </ul>
   </div>
   <div class="job_box">
@@ -111,11 +112,8 @@ Skills and Interests
 ======
 <hr />
 * **Programming Languages:** Python\*\*\*, Java\*\*\*, JavaScript\*\*\*, Matlab\*, Scala\*, R\*, C\*
-* **Related Technologies:** Linux, Git, React, Redux, HTML/CSS, Node.js, Gremlin, NumPy, Maven, JUnit, MySQL, libGDX, PIL, AWS Lambda, DynamoDB, S3, D3.js, THREE.js, C# Make
+* **Related Technologies:** Linux, Git, React, Redux, HTML/CSS, Node.js, Gremlin, NumPy, Maven, JUnit, MySQL, libGDX, PIL, AWS Lambda, DynamoDB, S3, D3.js, THREE.js, C# Make, OpenGL
 * **Selected Coursework:** Data Structures, Statistical Networks, Mathematical Modeling, Stat I and II, Algorithms, Data Visualization, Graphics, Computer Systems, Numerical Analysis, Simulation, Time Series
-
-<!-- Selected Projects -->
-<!-- ====== -->
 
 Selected Projects
 ======
