@@ -22,6 +22,16 @@ Education
 <hr id="education_bar" />
 
 <div id="education_box">
+  <div> Duke University </div>
+
+  <div> Aug. 2021 -- </div>
+
+  <div> Phd Student, Statistics </div>
+
+  <div> </div>
+</div>
+
+<div id="education_box">
   <div> University of Massachusetts: Amherst </div>
 
   <div> May, 2021 </div>
@@ -36,6 +46,17 @@ Work experience
 <hr />
 
 <div id="work_box">
+  <div class="job_box">
+    <div class="job_title">
+      <div>Genentech</div>
+      <div>Summer 2021</div>
+    </div>
+    <p>Research and Development Intern</p>
+    <ul>
+      <li> Lead development of epiviz.gl, a JS framework for visualizing genomic data with WebWorkers and WebGL. </li>
+      <li> Developed data selection, rendering, navigation with a pseudo grammar-of-graphics implementation. </li>
+    </ul>
+  </div>
   <div class="job_box">
     <div class="job_title">
       <div>Datadog</div>
@@ -111,13 +132,24 @@ Work experience
 Skills and Interests
 ======
 <hr />
-* **Programming Languages:** Python\*\*\*, Java\*\*\*, JavaScript\*\*\*, Matlab\*, Scala\*, R\*, C\*
+* **Programming Languages:** Python\*\*\*, Java\*\*\*, JavaScript\*\*\*, Matlab\*, Scala\*, R\*, C\*, Cpp\*, WebGL\*
 * **Related Technologies:** Linux, Git, React, Redux, HTML/CSS, Node.js, Gremlin, NumPy, Maven, JUnit, MySQL, libGDX, PIL, AWS Lambda, DynamoDB, S3, D3.js, THREE.js, C# Make, OpenGL
 * **Selected Coursework:** Data Structures, Statistical Networks, Mathematical Modeling, Stat I and II, Algorithms, Data Visualization, Graphics, Computer Systems, Numerical Analysis, Simulation, Time Series
 
 Selected Projects
 ======
 <hr />
+
+<div class="job_box">
+  <div class="job_title">
+    <div><a href="https://github.com/epiviz/epiviz.gl">JavaScript Package: epiviz.gl</a></div>
+  </div>
+  <ul>
+    <li> Developed for Genentech (advised by: <a href="https://www.jkanche.com/">Jayaram Kancherla</a>) to visualize genomic data seamlessly via declarative specifications and WebGL. </li>
+    <li> Designed to visualize millions of data points and entire chromosomes at 60 FPS with high precision. </li>
+    <li> Designed to visualize millions of data points and entire chromosomes at 60 FPS with high precision. </li>
+  </ul>
+</div>
 
 <div class="job_box">
   <div class="job_title">
