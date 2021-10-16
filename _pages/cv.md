@@ -147,7 +147,6 @@ Selected Projects
   <ul>
     <li> Developed for Genentech (advised by: <a href="https://www.jkanche.com/">Jayaram Kancherla</a>) to visualize genomic data seamlessly via declarative specifications and WebGL. </li>
     <li> Designed to visualize millions of data points and entire chromosomes at 60 FPS with high precision. </li>
-    <li> Designed to visualize millions of data points and entire chromosomes at 60 FPS with high precision. </li>
   </ul>
 </div>
 
