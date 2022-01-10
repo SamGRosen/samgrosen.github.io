@@ -15,7 +15,7 @@ Consider a game which features \\(n\\) distinct pairs of colored cards. Each car
 
 Performance in the game is determined by the player's ability to remember where certain cards are located and their luck when choosing cards to view.
 
-This game may be called as concentration and It may be worth familiarizing yourself with the game:
+This game may be called concentration and it is worth familiarizing yourself with the game:
 
 <div class="game-bar">
     <div>
