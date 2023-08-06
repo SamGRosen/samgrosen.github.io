@@ -5,7 +5,7 @@ type: "materials"
 permalink: /writings/ms-bootcamp
 ---
 
-Below you can find links to materials used in the Fall 2023 MS Boot Camp at Duke University.
+Materials used in the Fall 2023 MS Boot Camp at Duke University.
 
 ## [Day 1: Basics and Foundation of Python](ms-bootcamp-day1.html)
 
@@ -14,7 +14,7 @@ Below you can find links to materials used in the Fall 2023 MS Boot Camp at Duke
 ### Resources
 
 -   [Example Script](https://gist.github.com/SamGRosen/49d3ae2458083c4b975246ddd0622fcf)
--   [*Think Python (2nd Edition)*](https://greenteapress.com/wp/think-python-2e/)
+-   [Think Python (2nd Edition)](https://greenteapress.com/wp/think-python-2e/)
 -   [Automate the Boring Stuff with Python](https://automatetheboringstuff.com/)
 -   [Python Documentation](https://docs.python.org/3/)
 -   [Modeling and Simulation in Python](https://allendowney.github.io/ModSimPy/index.html)
