@@ -7,7 +7,7 @@ permalink: /writings/ms-bootcamp
 
 Materials used in the Fall 2023 MS Boot Camp at Duke University.
 
-## [Day 1: Basics and Foundation of Python](ms-bootcamp-day1.html)
+## <a name="day1"></a> [Day 1: Basics and Foundation of Python](ms-bootcamp-day1.html)
 
 [Python Practice](https://colab.research.google.com/drive/142X1rjJirmiZUR-UtbEMYp8JrUcOZF6_?usp=sharing)
 
@@ -20,7 +20,7 @@ Materials used in the Fall 2023 MS Boot Camp at Duke University.
 -   [Modeling and Simulation in Python](https://allendowney.github.io/ModSimPy/index.html)
 -   [STA663 Course Notes](https://sta663-sp22.github.io/)
 
-## [Day 2: Internship Prep, Concepts and Examples with Python](ms-bootcamp-day2.html)
+## <a name="day2"></a> [Day 2: Internship Prep, Concepts and Examples with Python](ms-bootcamp-day2.html)
 
 [Programming Challenge Practice](https://colab.research.google.com/drive/1eoxCBJErChn4Fr7RDuiCss2FIRr54MIq?usp=sharing)
 
@@ -35,7 +35,7 @@ Materials used in the Fall 2023 MS Boot Camp at Duke University.
 -  [A Practical Guide to Quantitative Finance Interviews](https://github.com/geniayuan/datasciencecoursera/blob/master/%5BXinfeng%20Zhou%5DA%20practical%20Guide%20to%20quantitative%20finance%20interviews.pdf)
 
 
-## [Day 5: Incredibly Fast Rundown of Machine Learning and `scikit-learn`](ms-bootcamp-day5.html)
+## <a name="day5"></a> [Day 5: Incredibly Fast Rundown of Machine Learning and `scikit-learn`](ms-bootcamp-day5.html)
 
 Example case study: [FlipFlop](https://colab.research.google.com/drive/14FGOLjZkUzSq5c9pHAklMWoEaI7mZvdU?usp=sharing)
 
