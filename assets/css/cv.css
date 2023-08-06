@@ -88,3 +88,16 @@ hr + p {
   margin: 0;
   font-style: italic;
 }
+
+.teach_title {
+  display: grid;
+  grid-template-columns: 2.8fr 1fr;
+}
+
+.teach_title div:nth-child(even) {
+  text-align: right;
+}
+
+.teach_box > ul {
+  margin: 0;
+}

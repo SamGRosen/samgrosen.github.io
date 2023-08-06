@@ -41,11 +41,22 @@ Education
   <div> GPA: 3.9/4.0 </div>
 </div>
 
-Work experience
+Work Experience
 ======
 <hr />
 
 <div id="work_box">
+  <div class="job_box">
+    <div class="job_title">
+      <div>Cruise</div>
+      <div>Summer 2022</div>
+    </div>
+    <p>Machine Learning Acceleration Intern</p>
+    <ul>
+      <li> Added robust standard error calculations to internal simulation metrics </li>
+      <li> Implemented Kernel Density Estimation and Bandwidth Selection for automatically analyzing performance degredation </li>
+    </ul>
+  </div>
   <div class="job_box">
     <div class="job_title">
       <div>Genentech</div>
@@ -104,37 +115,63 @@ Work experience
       <li> Worked with a partner to build a microservice acting as a REST backend to serve PDF’s with Spring. </li>
       <li> Created a service to read generated reports through a REST API on a dynamic front-end with React. </li>
     </ul>
-  </div>  
-  <div class="job_box">
-    <div class="job_title">
-      <div>UMass Mathematics Department</div>
-      <div>Spring 2020</div>
-    </div>
-    <p>Differential Equations Grader</p>
-    <ul>
-      <li> Graded <i>Ordinary Differential Equations</i> homework for two course sections. </li>
-    </ul>
-  </div>
-  <div class="job_box">
-    <div class="job_title">
-      <div>UMass Mathematics Department</div>
-      <div>Sept. 2018 - May 2019</div>
-    </div>
-    <p>Undergraduate Teaching Assistant</p>
-    <ul>
-      <li> Held office hours for <i>Calculus for Life and Social Sciences I</i> for 5 hours a week. </li>
-      <li> Presented exam review material for up to 200 students at a time. </li>
-    </ul>
   </div>
 </div>
 
+Teaching Experience
+======
+<hr />
+
+<div id="teaching_box">
+  <div class="teach_box">
+    <div class="teach_title">
+      <div>Duke Masters' Boot Camp (Instructor)</div>
+      <div>Fall 2023</div>
+    </div>
+    <ul>
+      <li> Developed extensive original <a href="../writings/ms-bootcamp.html">material</a> </li>
+    </ul>
+  </div>
+  <div class="teach_box">
+    <div class="teach_title">
+      <div>Duke STA313 (TA)</div>
+      <div>Spring 2023</div>
+    </div>
+    <ul>
+      <li> Developed material/guest lecturer as part of BASS Connections </li>
+    </ul>
+  </div>
+  <div class="teach_box">
+    <div class="teach_title">
+      <div>Duke STA198L (TA)</div>
+      <div>Fall 2022</div>
+    </div>
+  </div>
+  <div class="teach_box">
+    <div class="teach_title">
+      <div>Duke STA663L (TA)</div>
+      <div>Spring 2022</div>
+    </div>
+  </div>
+  <div class="teach_box">
+    <div class="teach_title">
+      <div>UMass MATH331 (Grader)</div>
+      <div>Spring 2020</div>
+    </div>
+  </div>
+  <div class="teach_box">
+    <div class="teach_title">
+      <div>UMass MATH127 (UGTA)</div>
+      <div>Sept. 2018 - May 2019</div>
+    </div>
+  </div>
+</div>
 
 Skills and Interests
 ======
 <hr />
-* **Programming Languages:** Python\*\*\*, Java\*\*\*, JavaScript\*\*\*, Matlab\*, Scala\*, R\*, C\*, Cpp\*, WebGL\*
+* **Programming Languages:** Python\*\*\*, Java\*\*\*, JavaScript\*\*\*, C/Cpp\**, Matlab\*, Scala\*, R\*,, WebGL\*
 * **Related Technologies:** Linux, Git, React, Redux, HTML/CSS, Node.js, Gremlin, NumPy, Maven, JUnit, MySQL, libGDX, PIL, AWS Lambda, DynamoDB, S3, D3.js, THREE.js, C# Make, OpenGL
-* **Selected Coursework:** Data Structures, Statistical Networks, Mathematical Modeling, Stat I and II, Algorithms, Data Visualization, Graphics, Computer Systems, Numerical Analysis, Simulation, Time Series
 
 Selected Projects
 ======
