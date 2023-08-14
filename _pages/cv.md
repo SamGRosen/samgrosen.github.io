@@ -53,8 +53,8 @@ Work Experience
     </div>
     <p>Machine Learning Acceleration Intern</p>
     <ul>
-      <li> Added robust standard error calculations to internal simulation metrics </li>
-      <li> Implemented Kernel Density Estimation and Bandwidth Selection for automatically analyzing performance degredation </li>
+      <li> Added robust standard error calculations to internal simulation metrics. </li>
+      <li> Implemented Kernel Density Estimation and Bandwidth Selection for automatically analyzing performance degradation. </li>
     </ul>
   </div>
   <div class="job_box">
