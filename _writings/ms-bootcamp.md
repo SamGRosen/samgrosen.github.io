@@ -26,6 +26,7 @@ Materials used in the Fall 2023 MS Boot Camp at Duke University.
 
 ### Resources
 
+-  [UMass CS311 Notes](https://people.cs.umass.edu/~sheldon/teaching/cs311/index.html)
 -  [Leetcode](leetcode.com)
 -  [HackerRank](https://www.hackerrank.com/)
 -  [NeetCode YouTube](https://www.youtube.com/c/neetcode)
