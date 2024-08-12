@@ -1,11 +1,11 @@
 ---
-title: "MS Boot Camp Fall 2023"
+title: "MS Boot Camp Fall 2023/2024"
 collection: writings
 type: "materials"
 permalink: /writings/ms-bootcamp
 ---
 
-Materials used in the Fall 2023 MS Boot Camp at Duke University.
+Materials used in the Fall 2023/2024 MS Boot Camp at Duke University.
 
 ## <a name="day1"></a> [Day 1: Basics and Foundation of Python](ms-bootcamp-day1.html)
 
@@ -35,7 +35,7 @@ Materials used in the Fall 2023 MS Boot Camp at Duke University.
 -  [A Practical Guide to Quantitative Finance Interviews](https://github.com/geniayuan/datasciencecoursera/blob/master/%5BXinfeng%20Zhou%5DA%20practical%20Guide%20to%20quantitative%20finance%20interviews.pdf)
 
 
-## <a name="day5"></a> [Day 5: Incredibly Fast Rundown of Machine Learning and `scikit-learn`](ms-bootcamp-day5.html)
+## <a name="day3"></a> [Day 3: Incredibly Fast Rundown of Machine Learning and `scikit-learn`](ms-bootcamp-day3.html)
 
 Example case study: [FlipFlop](https://colab.research.google.com/drive/14FGOLjZkUzSq5c9pHAklMWoEaI7mZvdU?usp=sharing)
 
