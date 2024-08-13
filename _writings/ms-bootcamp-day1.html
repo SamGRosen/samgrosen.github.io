@@ -1363,7 +1363,7 @@ True</code></pre>
 </ul>
 <div class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1"></a><span class="bu">list</span>(<span class="bu">filter</span>(<span class="kw">lambda</span> num: num <span class="op">&gt;</span> <span class="dv">5</span>, [<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">10</span>, <span class="dv">20</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="37">
+<div class="cell-output cell-output-display" data-execution_count="3">
 <pre><code>[10, 20]</code></pre>
 </div>
 </div>
@@ -1641,8 +1641,8 @@ True</code></pre>
 </ul>
 <div class="cell" data-execution_count="23">
 <div class="sourceCode cell-code" id="cb35"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1"></a>my_set1 <span class="op">=</span> {<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>}</span>
-<span id="cb35-2"><a href="#cb35-2"></a>my_set2 <span class="op">=</span> <span class="bu">set</span>(<span class="bu">range</span>(<span class="dv">1</span>, <span class="dv">3</span>))</span>
-<span id="cb35-3"><a href="#cb35-3"></a>my_set3 <span class="op">=</span> {x <span class="op">**</span> <span class="dv">2</span> <span class="cf">for</span> x <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>)}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb35-2"><a href="#cb35-2"></a>my_set2 <span class="op">=</span> <span class="bu">set</span>(<span class="bu">range</span>(<span class="dv">1</span>, <span class="dv">4</span>))</span>
+<span id="cb35-3"><a href="#cb35-3"></a>my_set3 <span class="op">=</span> {x <span class="cf">for</span> x <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, <span class="dv">4</span>)}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <ul>
 <li>Sets are also aliased</li>
@@ -1735,7 +1735,7 @@ True</code></pre>
 <span id="cb44-10"><a href="#cb44-10"></a>)</span>
 <span id="cb44-11"><a href="#cb44-11"></a></span>
 <span id="cb44-12"><a href="#cb44-12"></a>my_data[<span class="st">&quot;item1&quot;</span>][<span class="st">&quot;status&quot;</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="53">
+<div class="cell-output cell-output-display" data-execution_count="19">
 <pre><code>&#39;open&#39;</code></pre>
 </div>
 </div>
@@ -1803,14 +1803,19 @@ unhashable type: &#39;list&#39;</code></pre>
 <span id="cb50-4"><a href="#cb50-4"></a><span class="kw">def</span> print_data(data):</span>
 <span id="cb50-5"><a href="#cb50-5"></a>  <span class="cf">for</span> item <span class="kw">in</span> data:</span>
 <span id="cb50-6"><a href="#cb50-6"></a>    <span class="bu">print</span>(item, end<span class="op">=</span><span class="st">&quot; &quot;</span>)</span>
-<span id="cb50-7"><a href="#cb50-7"></a></span>
-<span id="cb50-8"><a href="#cb50-8"></a>print_data(my_str)</span>
-<span id="cb50-9"><a href="#cb50-9"></a>print_data(<span class="bu">set</span>(my_str))  <span class="co"># No order or repeats</span></span>
-<span id="cb50-10"><a href="#cb50-10"></a>print_data(<span class="bu">list</span>(my_str))</span>
-<span id="cb50-11"><a href="#cb50-11"></a>print_data(<span class="bu">tuple</span>(my_str))</span>
-<span id="cb50-12"><a href="#cb50-12"></a>print_data(Counter(my_str))  <span class="co"># Dictionaries are ordered by insertion, iterates over keys</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb50-7"><a href="#cb50-7"></a>  <span class="bu">print</span>()</span>
+<span id="cb50-8"><a href="#cb50-8"></a></span>
+<span id="cb50-9"><a href="#cb50-9"></a>print_data(my_str)</span>
+<span id="cb50-10"><a href="#cb50-10"></a>print_data(<span class="bu">set</span>(my_str))  <span class="co"># No order or repeats</span></span>
+<span id="cb50-11"><a href="#cb50-11"></a>print_data(<span class="bu">list</span>(my_str))</span>
+<span id="cb50-12"><a href="#cb50-12"></a>print_data(<span class="bu">tuple</span>(my_str))</span>
+<span id="cb50-13"><a href="#cb50-13"></a>print_data(Counter(my_str))  <span class="co"># Dictionaries are ordered by insertion, iterates over keys</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>I   e n j o y   e a t i n g   a l m o n d s j y m n l o i e a I s g   d t I   e n j o y   e a t i n g   a l m o n d s I   e n j o y   e a t i n g   a l m o n d s I   e n j o y a t i g l m d s </code></pre>
+<pre><code>I   e n j o y   e a t i n g   a l m o n d s 
+o g d e l s t y j   n m i a I 
+I   e n j o y   e a t i n g   a l m o n d s 
+I   e n j o y   e a t i n g   a l m o n d s 
+I   e n j o y a t i g l m d s </code></pre>
 </div>
 </div>
 <div class="footer">
@@ -1894,7 +1899,7 @@ unhashable type: &#39;list&#39;</code></pre>
 <span id="cb58-4"><a href="#cb58-4"></a>  <span class="cf">return</span> k <span class="op">+</span> sum_of_first_k_nums(k <span class="op">-</span> <span class="dv">1</span>)</span>
 <span id="cb58-5"><a href="#cb58-5"></a></span>
 <span id="cb58-6"><a href="#cb58-6"></a>sum_of_first_k_nums(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="60">
+<div class="cell-output cell-output-display" data-execution_count="26">
 <pre><code>15</code></pre>
 </div>
 </div>
@@ -1980,12 +1985,12 @@ unhashable type: &#39;list&#39;</code></pre>
 <span id="cb66-25"><a href="#cb66-25"></a><span class="bu">print</span>(my_deck.draw_card())</span>
 <span id="cb66-26"><a href="#cb66-26"></a><span class="bu">print</span>(my_deck.draw_card())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>(&#39;Spades&#39;, 5)
-(&#39;Spades&#39;, 2)</code></pre>
+<pre><code>(&#39;Hearts&#39;, 9)
+(&#39;Spades&#39;, 7)</code></pre>
 </div>
 </div>
 <div class="footer">
-<p>Think Python (2nd Edition) <a href="https://greenteapress.com/thinkpython2/html/thinkpython2016.html">Chapter 15</a>, <a href="https://greenteapress.com/thinkpython2/html/thinkpython2017">Chapter 16</a>, <a href="https://greenteapress.com/thinkpython2/html/thinkpython2018">Chapter 17</a>, <a href="https://greenteapress.com/thinkpython2/html/thinkpython2019">Chapter 18</a></p>
+<p>Think Python (2nd Edition) <a href="https://greenteapress.com/thinkpython2/html/thinkpython2016.html">Chapter 15</a>, <a href="https://greenteapress.com/thinkpython2/html/thinkpython2017.html">Chapter 16</a>, <a href="https://greenteapress.com/thinkpython2/html/thinkpython2018.html">Chapter 17</a>, <a href="https://greenteapress.com/thinkpython2/html/thinkpython2019.html">Chapter 18</a></p>
 </div>
 </section>
 <section id="useful-methods-3" class="slide level2">
