@@ -9,7 +9,7 @@ Materials used in the Fall 2023/2024 MS Boot Camp at Duke University.
 
 ## <a name="day1"></a> [Day 1: Basics and Foundation of Python](ms-bootcamp-day1.html)
 
-[Python Practice](https://colab.research.google.com/drive/142X1rjJirmiZUR-UtbEMYp8JrUcOZF6_?usp=sharing)
+[Python Practice](https://colab.research.google.com/drive/142X1rjJirmiZUR-UtbEMYp8JrUcOZF6_?usp=sharing) [(Key)](https://colab.research.google.com/drive/1iaCaOASV1DJQXTC9jpmDKqVzxBKRjIFS?usp=sharing)
 
 ### Resources
 
