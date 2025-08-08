@@ -1,11 +1,11 @@
 ---
-title: "MS Boot Camp Fall 2023/2024"
+title: "MS Boot Camp Fall 2023/2024/2025"
 collection: writings
 type: "materials"
 permalink: /writings/ms-bootcamp
 ---
 
-Materials used in the Fall 2023/2024 MS Boot Camp at Duke University. Code used to create this material can be found [here](https://github.com/SamGRosen/bootcamp).
+Materials used in the Fall 2023/2024/2025 MS Boot Camp at Duke University. Code used to create this material can be found [here](https://github.com/SamGRosen/bootcamp).
 
 ## <a name="day1"></a> [Day 1: Basics and Foundation of Python](ms-bootcamp-day1.html)
 
