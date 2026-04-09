@@ -59,17 +59,6 @@ Work Experience
   </div>
   <div class="job_box">
     <div class="job_title">
-      <div>Genentech</div>
-      <div>Summer 2021</div>
-    </div>
-    <p>Research and Development Intern</p>
-    <ul>
-      <li> Lead development of epiviz.gl, a JS framework for visualizing genomic data with WebWorkers and WebGL. </li>
-      <li> Developed data selection, rendering, navigation with a pseudo grammar-of-graphics implementation. </li>
-    </ul>
-  </div>
-  <div class="job_box">
-    <div class="job_title">
       <div>Cruise</div>
       <div>Summer 2022</div>
     </div>
