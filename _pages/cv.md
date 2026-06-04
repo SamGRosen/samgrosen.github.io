@@ -1,6 +1,6 @@
 ---
 layout: archive
-title: "S. Rosen - CV"
+title: "Sam Rosen - CV"
 permalink: /cv/
 author_profile: true
 redirect_from:
@@ -18,23 +18,32 @@ redirect_from:
 </div>
 
 Education
-======
+=========
 <hr id="education_bar" />
 
 <div id="education_box">
   <div> Duke University </div>
 
-  <div> Aug. 2021 -- </div>
+  <div> May 2026 </div>
 
-  <div> Phd Student, Statistics </div>
+  <div> Ph.D., Statistical Science; Advisor: <a href="https://jasonxu90.github.io/">Jason Xu</a> </div>
 
   <div> </div>
+
+  <div>
+    Dissertation Title: <a href="https://www.proquest.com/docview/3341341952" style="font-style: italic;"> Convex Optimization Methods for Structured Statistical Problems </a>
+    <ul>
+      <li> Summer Research Fellowship (2025) </li>
+      <li> Honorable Mention for Teaching Assistant of the Year (2023) </li>
+      <li> Bass Connections Fellowship (2022) </li>
+    </ul>
+  </div>
 </div>
 
 <div id="education_box">
   <div> University of Massachusetts: Amherst </div>
 
-  <div> May, 2021 </div>
+  <div> May 2021 </div>
 
   <div> B.S. in Computer Science; B.S. in Mathematics </div>
 
@@ -42,7 +51,7 @@ Education
 </div>
 
 Work Experience
-======
+===============
 <hr />
 
 <div id="work_box">
@@ -59,7 +68,7 @@ Work Experience
   </div>
   <div class="job_box">
     <div class="job_title">
-      <div>Cruise</div>
+      <div>Cruise LLC (General Motors)</div>
       <div>Summer 2022</div>
     </div>
     <p>Machine Learning Acceleration Intern</p>
@@ -129,15 +138,42 @@ Work Experience
   </div>
 </div>
 
+
+Publications
+============
+
+* Sam Rosen and Jason Xu (Aug. 2026). “Constrained Weighted Bayesian Bootstrap”. In: *Conference on Uncertainty in Artificial
+Intelligence* 42, Accepted and to appear. arXiv: [2606.04237](https://arxiv.org/abs/2606.04237) [stat.ME].
+
+* Sam Rosen and Jason Xu (May 2026). “Affinity Graph Connectivity in Convex Clustering“. *In Submission*. arXiv: [2605.24673](https://arxiv.org/abs/2605.24673) [stat.ML].
+
+* Sam Rosen, Eric C. Chi, and Jason Xu (Apr. 2026). “Biconvex Biclustering“. *In Submission*. arXiv: [2604.03936](https://arxiv.org/abs/2604.03936) [stat.ML].
+
+* Jiachang Liu, Sam Rosen, Chudi Zhong, and Cynthia Rudin (Dec. 2023). “OKRidge: Scalable Optimal k-Sparse Ridge
+Regression”. In: *Advances in neural information processing systems* 36. NeurIPS 2023 Spotlight Paper, pp. 41076–41258. arXiv: [2304.06686](https://arxiv.org/abs/2304.06686) [cs.LG].
+
+
 Teaching Experience
-======
+===================
 <hr />
 
 <div id="teaching_box">
   <div class="teach_box">
     <div class="teach_title">
-      <div>Duke Masters' Boot Camp (Instructor)</div>
-      <div>Fall 2023</div>
+      <div>Duke STA663L, Statistical Computing and Computation in Python (TA)</div>
+      <div>Spring 2022, 2024, 2025, 2026</div>
+    </div>
+  </div>
+  <div class="teach_box">
+    <div class="teach_title">
+      <div>Duke STA523, Programming for Statistical Science in R (TA)</div>
+      <div>Fall 2025</div>
+    </div>
+  </div>
+  <div class="teach_box">
+    <div class="teach_title">
+      <div>Duke Statical Science Masters' Boot Camp (Instructor)</div>
+      <div>Fall 2023, 2024 and 2025</div>
     </div>
     <ul>
       <li> Developed extensive original <a href="../writings/ms-bootcamp.html">material</a> </li>
@@ -145,7 +181,7 @@ Teaching Experience
   </div>
   <div class="teach_box">
     <div class="teach_title">
-      <div>Duke STA313 (TA)</div>
+      <div>Duke STA313, Data Visualization (TA)</div>
       <div>Spring 2023</div>
     </div>
     <ul>
@@ -154,14 +190,8 @@ Teaching Experience
   </div>
   <div class="teach_box">
     <div class="teach_title">
-      <div>Duke STA198L (TA)</div>
+      <div>Duke STA198L, Intro to Global Health Data Science (TA)</div>
       <div>Fall 2022</div>
-    </div>
-  </div>
-  <div class="teach_box">
-    <div class="teach_title">
-      <div>Duke STA663L (TA)</div>
-      <div>Spring 2022</div>
     </div>
   </div>
   <div class="teach_box">
@@ -173,16 +203,11 @@ Teaching Experience
   <div class="teach_box">
     <div class="teach_title">
       <div>UMass MATH127 (UGTA)</div>
-      <div>Sept. 2018 - May 2019</div>
+      <div>Fall 2018, Spring 2019</div>
     </div>
   </div>
 </div>
 
-Skills and Interests
-======
-<hr />
-* **Programming Languages:** Python\*\*\*, Java\*\*\*, JavaScript\*\*\*, C/Cpp\**, Matlab\*, Scala\*, R\*,, WebGL\*
-* **Related Technologies:** Linux, Git, React, Redux, HTML/CSS, Node.js, Gremlin, NumPy, Maven, JUnit, MySQL, libGDX, PIL, AWS Lambda, DynamoDB, S3, D3.js, THREE.js, C# Make, OpenGL
 
 Selected Projects
 ======
@@ -217,3 +242,9 @@ Selected Projects
     <li> Formulated an algorithm which packs circles in linear time achieving competitive densities near 70 percent. </li>
   </ul>
 </div>
+
+Skills and Interests
+======
+<hr />
+* **Programming Languages:** Python\*\*\*, R\*\*\*, Java\*\*\*, JavaScript\*\*\*, Julia\*\*, C/Cpp\*\*, Matlab\*, Scala\*, WebGL\*
+* **Related Technologies:** Linux, Git, React, Redux, HTML/CSS, Node.js, Gremlin, NumPy, Maven, JUnit, MySQL, libGDX, PIL, AWS Lambda, DynamoDB, S3, D3.js, THREE.js, C# Make, OpenGL

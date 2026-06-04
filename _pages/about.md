@@ -1,6 +1,6 @@
 ---
 permalink: /
-title: "S. Rosen"
+title: "Sam Rosen"
 excerpt: "About me"
 author_profile: true
 layout: single
