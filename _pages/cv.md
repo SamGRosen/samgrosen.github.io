@@ -143,14 +143,14 @@ Publications
 ============
 <hr />
 
-* Sam Rosen and Jason Xu (Aug. 2026). “Constrained Weighted Bayesian Bootstrap”. In: *Conference on Uncertainty in Artificial
+* **Sam Rosen** and Jason Xu (Aug. 2026). “Constrained Weighted Bayesian Bootstrap”. In: *Conference on Uncertainty in Artificial
 Intelligence* 42, Accepted and to appear. arXiv: [2606.04237](https://arxiv.org/abs/2606.04237) [stat.ME]. [Github](https://github.com/SamGRosen/CWBB).
 
-* Sam Rosen and Jason Xu (May 2026). “Affinity Graph Connectivity in Convex Clustering“. *In Submission*. arXiv: [2605.24673](https://arxiv.org/abs/2605.24673) [stat.ML]. [Github](https://github.com/SamGRosen/convex_cluster_experiments).
+* **Sam Rosen** and Jason Xu (May 2026). “Affinity Graph Connectivity in Convex Clustering“. *In Submission*. arXiv: [2605.24673](https://arxiv.org/abs/2605.24673) [stat.ML]. [Github](https://github.com/SamGRosen/convex_cluster_experiments).
 
-* Sam Rosen, Eric C. Chi, and Jason Xu (Apr. 2026). “Biconvex Biclustering“. *In Submission*. arXiv: [2604.03936](https://arxiv.org/abs/2604.03936) [stat.ML]. [Github](https://github.com/SamGRosen/BCBC).
+* **Sam Rosen**, Eric C. Chi, and Jason Xu (Apr. 2026). “Biconvex Biclustering“. *In Submission*. arXiv: [2604.03936](https://arxiv.org/abs/2604.03936) [stat.ML]. [Github](https://github.com/SamGRosen/BCBC).
 
-* Jiachang Liu, Sam Rosen, Chudi Zhong, and Cynthia Rudin (Dec. 2023). “OKRidge: Scalable Optimal k-Sparse Ridge
+* Jiachang Liu, **Sam Rosen**, Chudi Zhong, and Cynthia Rudin (Dec. 2023). “OKRidge: Scalable Optimal k-Sparse Ridge
 Regression”. In: *Advances in neural information processing systems* 36. NeurIPS 2023 Spotlight Paper, pp. 41076–41258. arXiv: [2304.06686](https://arxiv.org/abs/2304.06686) [cs.LG]. [Github](https://github.com/jiachangliu/OKRidge).
 
 
@@ -211,7 +211,7 @@ Teaching Experience
 
 
 Selected Projects
-======
+=================
 <hr />
 
 <div class="job_box">
@@ -245,7 +245,7 @@ Selected Projects
 </div>
 
 Miscellaneous
-======
+=============
 <hr />
 
 * **Programming Languages:** Python\*\*\*, R\*\*\*, Java\*\*\*, JavaScript\*\*\*, Julia\*\*, C/Cpp\*\*, Matlab\*, Scala\*, WebGL\*
