@@ -141,16 +141,17 @@ Work Experience
 
 Publications
 ============
+<hr />
 
 * Sam Rosen and Jason Xu (Aug. 2026). “Constrained Weighted Bayesian Bootstrap”. In: *Conference on Uncertainty in Artificial
-Intelligence* 42, Accepted and to appear. arXiv: [2606.04237](https://arxiv.org/abs/2606.04237) [stat.ME].
+Intelligence* 42, Accepted and to appear. arXiv: [2606.04237](https://arxiv.org/abs/2606.04237) [stat.ME]. [Github](https://github.com/SamGRosen/CWBB).
 
-* Sam Rosen and Jason Xu (May 2026). “Affinity Graph Connectivity in Convex Clustering“. *In Submission*. arXiv: [2605.24673](https://arxiv.org/abs/2605.24673) [stat.ML].
+* Sam Rosen and Jason Xu (May 2026). “Affinity Graph Connectivity in Convex Clustering“. *In Submission*. arXiv: [2605.24673](https://arxiv.org/abs/2605.24673) [stat.ML]. [Github](https://github.com/SamGRosen/convex_cluster_experiments).
 
-* Sam Rosen, Eric C. Chi, and Jason Xu (Apr. 2026). “Biconvex Biclustering“. *In Submission*. arXiv: [2604.03936](https://arxiv.org/abs/2604.03936) [stat.ML].
+* Sam Rosen, Eric C. Chi, and Jason Xu (Apr. 2026). “Biconvex Biclustering“. *In Submission*. arXiv: [2604.03936](https://arxiv.org/abs/2604.03936) [stat.ML]. [Github](https://github.com/SamGRosen/BCBC).
 
 * Jiachang Liu, Sam Rosen, Chudi Zhong, and Cynthia Rudin (Dec. 2023). “OKRidge: Scalable Optimal k-Sparse Ridge
-Regression”. In: *Advances in neural information processing systems* 36. NeurIPS 2023 Spotlight Paper, pp. 41076–41258. arXiv: [2304.06686](https://arxiv.org/abs/2304.06686) [cs.LG].
+Regression”. In: *Advances in neural information processing systems* 36. NeurIPS 2023 Spotlight Paper, pp. 41076–41258. arXiv: [2304.06686](https://arxiv.org/abs/2304.06686) [cs.LG]. [Github](https://github.com/jiachangliu/OKRidge).
 
 
 Teaching Experience
@@ -243,8 +244,10 @@ Selected Projects
   </ul>
 </div>
 
-Skills and Interests
+Miscellaneous
 ======
 <hr />
+
 * **Programming Languages:** Python\*\*\*, R\*\*\*, Java\*\*\*, JavaScript\*\*\*, Julia\*\*, C/Cpp\*\*, Matlab\*, Scala\*, WebGL\*
-* **Related Technologies:** Linux, Git, React, Redux, HTML/CSS, Node.js, Gremlin, NumPy, Maven, JUnit, MySQL, libGDX, PIL, AWS Lambda, DynamoDB, S3, D3.js, THREE.js, C# Make, OpenGL
+* **Reviewer:** [2026 AAAI MURE Workshop](https://openreview.net/group?id=AAAI.org%2F2026%2FWorkshop%2FMURE#tab-accept-poster)
+* **Research Interests:** Statistical Computing, Convex Optimization, Clustering, High-performance Computing
